@@ -10,5 +10,5 @@ public interface AutoCodeInf {
    *
    * @param param @创建日期 2016年10月7日
    */
-  public void autoCode(CreateParamBean param);
+  void autoCode(CreateParamBean param);
 }

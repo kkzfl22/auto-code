@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.kk.autocode.encode.code.bean.*;
+import com.kk.autocode.encode.code.bean.microservice.JavaCodeRepositoryPoCreate;
 import com.kk.element.database.mysql.pojo.TableInfoDTO;
 import org.aspectj.util.FileUtil;
 
@@ -91,6 +92,18 @@ public class AutoCodeBeanBuilder implements AutoCodeBuilderInf {
 
   /** 添加mapper的测试代码 方法描述 */
   public AutoCodeBeanBuilder addMapper() {
+    this.autoList.add(new JavaCodeBeanMyBatisMapperCreate());
+    return this;
+  }
+
+  /** 添加微服务的数据库实体 */
+  public AutoCodeBeanBuilder addMicorServiceRepositoryPo() {
+    this.autoList.add(new JavaCodeRepositoryPoCreate());
+    return this;
+  }
+
+  /** 添加微服务的数据库操作实体 */
+  public AutoCodeBeanBuilder addMicroServiceRepositoryMapper() {
     this.autoList.add(new JavaCodeBeanMyBatisMapperCreate());
     return this;
   }

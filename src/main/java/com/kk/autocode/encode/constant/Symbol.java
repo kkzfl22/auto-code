@@ -25,4 +25,26 @@ public class Symbol {
 
   /** 空格 */
   public static final String SPACE = " ";
+
+  /** 分号 */
+  public static final String SEMICOLON = ";";
+
+  /** 左括号 */
+  public static final String BRACKET_LEFT = "(";
+
+  /** 右括号 */
+  public static final String BRACKET_RIGHT = ")";
+
+  /** 左大括号 */
+  public static final String BRACK_LEFT = "{";
+
+  /** 右大括号 */
+  public static final String BRACK_RIGHT = "}";
+
+  /** 双引号 */
+  public static final String QUOTE = "\"";
+
+  public static final String EQUAL = "=";
+
+  public static final String POUND = "#";
 }

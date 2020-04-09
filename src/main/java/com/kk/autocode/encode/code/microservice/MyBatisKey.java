@@ -1,4 +1,4 @@
-package com.kk.autocode.encode.code.bean.microservice;
+package com.kk.autocode.encode.code.microservice;
 
 /**
  * @author liujun
@@ -21,4 +21,8 @@ public class MyBatisKey {
 
   /** 注释结束 */
   public static final String DOC_END = "-->";
+
+  public static final String NULL_VALUE = "null";
+
+  public static final String EMPTY_VALUE = "''";
 }

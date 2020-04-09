@@ -130,6 +130,17 @@ public enum JavaDataTypeEnum {
     return JavaDataTypeEnum.VARCHAR.getJavaType();
   }
 
+  public static StandardTypeEnum getStandardType(String javaType) {
+    for (JavaDataTypeEnum dataType : values()) {
+      if (dataType.getJavaType().equals(javaType)) {
+        return dataType.getKey();
+      }
+    }
+
+    // 默认返回String类型
+    return JavaDataTypeEnum.VARCHAR.key;
+  }
+
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder("JavaDataTypeEnum{");

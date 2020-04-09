@@ -12,3 +12,5 @@ dlaas-main.iml
 /.idea
 target/
 /.metadata/
+/src/main/resources/autosql/~$tabase-15.doc
+/src/main/resources/autosql/~WRL0004.tmp

@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.kk.autocode.encode.code.bean.*;
-import com.kk.autocode.encode.code.bean.microservice.JavaCodeRepositoryPoCreate;
+import com.kk.autocode.encode.code.microservice.JavaCodeRepositoryDaoInfCreate;
+import com.kk.autocode.encode.code.microservice.JavaCodeRepositoryJunitDaoCreate;
+import com.kk.autocode.encode.code.microservice.JavaCodeRepositoryMyBatisMapperCreate;
+import com.kk.autocode.encode.code.microservice.JavaCodeRepositoryPoCreate;
 import com.kk.element.database.mysql.pojo.TableInfoDTO;
 import org.aspectj.util.FileUtil;
 
@@ -102,9 +105,21 @@ public class AutoCodeBeanBuilder implements AutoCodeBuilderInf {
     return this;
   }
 
+  /** 添加微服务的数据库操作接口 */
+  public AutoCodeBeanBuilder addMicroServiceRepositoryDAOInf() {
+    this.autoList.add(new JavaCodeRepositoryDaoInfCreate());
+    return this;
+  }
+
   /** 添加微服务的数据库操作实体 */
   public AutoCodeBeanBuilder addMicroServiceRepositoryMapper() {
-    this.autoList.add(new JavaCodeBeanMyBatisMapperCreate());
+    this.autoList.add(new JavaCodeRepositoryMyBatisMapperCreate());
+    return this;
+  }
+
+  /** 添加微服务的数据库操作单元测试接口 */
+  public AutoCodeBeanBuilder addMicroServiceRepositoryJunitDAOInf() {
+    this.autoList.add(new JavaCodeRepositoryJunitDaoCreate());
     return this;
   }
 

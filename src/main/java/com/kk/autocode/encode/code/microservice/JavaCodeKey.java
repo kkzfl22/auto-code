@@ -1,4 +1,4 @@
-package com.kk.autocode.encode.code.bean.microservice;
+package com.kk.autocode.encode.code.microservice;
 
 /**
  * 定义java的关键字
@@ -16,6 +16,14 @@ public class JavaCodeKey {
   public static final String IMPORT = "import";
 
   public static final String PUBLIC = "public";
+
+  public static final String THIS = "this";
+
+  public static final String NEW = "new";
+
+  public static final String RETURN = "return";
+
+  public static final String INT_TYPE = "int";
 
   public static final String INTERFACE = "interface";
 
@@ -49,4 +57,8 @@ public class JavaCodeKey {
 
   /** 用来生成toString */
   public static final String BEAN_USE_TOSTRING = "@ToString";
+
+  public static final String LIST_TYPE = "List<";
+
+  public static final String LIST_TYPE_END = ">";
 }

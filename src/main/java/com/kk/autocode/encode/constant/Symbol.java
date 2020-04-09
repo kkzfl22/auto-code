@@ -36,15 +36,17 @@ public class Symbol {
   public static final String BRACKET_RIGHT = ")";
 
   /** 左大括号 */
-  public static final String BRACK_LEFT = "{";
+  public static final String BRACE_LEFT = "{";
 
   /** 右大括号 */
-  public static final String BRACK_RIGHT = "}";
+  public static final String BRACE_RIGHT = "}";
 
   /** 双引号 */
   public static final String QUOTE = "\"";
 
   public static final String EQUAL = "=";
+
+  public static final String EQUAL_NOT = "!= ";
 
   public static final String POUND = "#";
 }

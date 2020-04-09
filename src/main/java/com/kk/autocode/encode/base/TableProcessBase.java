@@ -4,6 +4,7 @@ import com.kk.autocode.console.ConfigEnum;
 import com.kk.autocode.db.DbProcessInf;
 import com.kk.autocode.db.mysql.DbMysqlProcessImpl;
 import com.kk.autocode.db.oracle.DbOracleProcessImpl;
+import com.kk.autocode.encode.constant.Symbol;
 import com.kk.docprocess.doctoadapterdoc.process.impl.ValueProcess;
 import com.kk.element.database.mysql.pojo.TableColumnDTO;
 import com.kk.element.database.mysql.pojo.TableInfoDTO;
@@ -318,7 +319,7 @@ public class TableProcessBase {
       String value = createValue(columnList.get(i));
 
       // 添加当前的属性值的注释
-      sb.append(formatMsg(2)).append("//");
+      sb.append(formatMsg(2)).append(Symbol.PATH).append(Symbol.PATH);
       sb.append(columnList.get(i).getColumnMsg());
       sb.append(NEXT_LINE);
       // 添加生成代码的方法

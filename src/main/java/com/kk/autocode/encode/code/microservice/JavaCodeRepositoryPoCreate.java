@@ -1,16 +1,14 @@
-package com.kk.autocode.encode.code.bean.microservice;
+package com.kk.autocode.encode.code.microservice;
 
 import com.kk.autocode.encode.base.TableProcessBase;
 import com.kk.autocode.encode.bean.CreateParamBean;
 import com.kk.autocode.encode.bean.EncodeContext;
 import com.kk.autocode.encode.code.AutoCodeInf;
 import com.kk.autocode.encode.constant.Symbol;
-import com.kk.autocode.util.DateUtils;
 import com.kk.element.database.mysql.pojo.TableColumnDTO;
 import com.kk.element.database.mysql.pojo.TableInfoDTO;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +105,7 @@ public class JavaCodeRepositoryPoCreate extends TableProcessBase implements Auto
       sb.append(JavaCodeKey.BEAN_USE_DATA).append(NEXT_LINE);
       sb.append(JavaCodeKey.BEAN_USE_TOSTRING).append(NEXT_LINE);
 
-      sb.append(JavaCodeKey.ClASS_START).append(className).append(Symbol.BRACK_LEFT);
+      sb.append(JavaCodeKey.ClASS_START).append(className).append(Symbol.BRACE_LEFT);
       sb.append(NEXT_LINE);
       sb.append(NEXT_LINE);
       sb.append(NEXT_LINE);
@@ -135,10 +133,10 @@ public class JavaCodeRepositoryPoCreate extends TableProcessBase implements Auto
       }
 
       // 结束
-      sb.append(Symbol.BRACK_RIGHT);
-      FileWriter fw = new FileWriter(new File(path + className + JavaCodeKey.FILE_SUFFIX));
-      fw.write(sb.toString());
-      fw.close();
+      sb.append(Symbol.BRACE_RIGHT);
+
+      String fileOut = path + className + JavaCodeKey.FILE_SUFFIX;
+      FileUtils.writeFile(fileOut, sb);
     }
   }
 

@@ -1,4 +1,4 @@
-package com.kk.autocode.encode.code.bean.microservice;
+package com.kk.autocode.encode.code.microservice;
 
 /**
  * 创建数据库访问层的PO对象

@@ -12,6 +12,7 @@ import com.kk.docprocess.doctosql.service.tosql.CreateSqlService;
 import com.kk.docprocess.doctosql.service.tosql.FileWriteService;
 import com.kk.docprocess.doctosql.service.tosql.impl.FileWriteServiceImpl;
 import com.kk.docprocess.doctosql.service.tosql.impl.MysqlCreateSqlServiceImpl;
+import com.kk.docprocess.doctosql.service.tosql.impl.SqlLiteCreateSqlServiceImpl;
 
 public class MysqlCreateSqlRun {
 
@@ -35,6 +36,7 @@ public class MysqlCreateSqlRun {
 
     // 生成sql的类信息
     CreateSqlService createSql = new MysqlCreateSqlServiceImpl(true);
+    // CreateSqlService createSql = new SqlLiteCreateSqlServiceImpl(true);
 
     // 写入文件
     FileWriteService fileWrite = new FileWriteServiceImpl();
@@ -44,7 +46,7 @@ public class MysqlCreateSqlRun {
 
       String sql = createSql.toSqlStr(list);
 
-      String outPath = "D:/java/test/mysql-a11.sql";
+      String outPath = "D:/java/test/sqllite-a11.sql";
 
       // 进行文件写入
       fileWrite.wirteFile(outPath, sql);

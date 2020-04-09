@@ -1,11 +1,10 @@
-package com.kk.autocode.encode.code.bean.microservice;
+package com.kk.autocode.encode.code.microservice;
 
 import com.kk.autocode.encode.base.TableProcessBase;
 import com.kk.autocode.encode.bean.CreateParamBean;
 import com.kk.autocode.encode.bean.EncodeContext;
 import com.kk.autocode.encode.code.AutoCodeInf;
-import com.kk.autocode.encode.constant.SqlKeyEnum;
-import com.kk.autocode.encode.constant.Symbol;
+import com.kk.autocode.encode.constant.*;
 import com.kk.element.database.mysql.pojo.TableColumnDTO;
 import com.kk.element.database.mysql.pojo.TableInfoDTO;
 import com.kk.element.database.type.DataTypeResource;
@@ -14,7 +13,6 @@ import com.kk.element.database.type.constant.DatabaseTypeSourceEnum;
 import com.kk.element.database.type.pojo.bean.DatabaseTypeMsgBO;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -30,13 +28,17 @@ import java.util.Map.Entry;
 public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase implements AutoCodeInf {
 
   public static final String DOC = "数据库操作";
+  public static final String MYBATIS_SUFFIX_NAME = "Mapper.xml";
+  public static final String OUT_DIR = "beanMapper";
 
   private static final String NAMESPACE_START = "<mapper namespace=\"";
-  private static final String RESULTMAP = "<resultMap type=\"";
-  private static final String RESULTMAP_END = "</resultMap>";
-  private static final String REUSLT_SUFFIX_NAME = "ResultMap";
+  private static final String NAMESPACE_END = "</mapper>";
+  private static final String RESULT_MAP = "<resultMap type=\"";
+  private static final String RESULT_MAP_END = "</resultMap>";
+  private static final String RESULT_SUFFIX_NAME = "ResultMap";
   private static final String ID = "id";
   private static final String PROPERTY = "property";
+  private static final String ID_PROPERTY = "id property";
   private static final String COLUMN = "column";
   private static final String RESULT = "<result ";
   private static final String IF_START = "<if test=\" ";
@@ -45,6 +47,7 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
   private static final String OPER_UPD = "修改操作";
   private static final String OPER_DEL = "删除操作";
   private static final String OPER_QRY = "查询操作";
+  private static final String OPER_QRY_ID = "根据id查询操作";
   private static final String INSERT_XML_START = "<insert id=\"insert\" parameterType=\"";
   private static final String INSERT_SQL_START = "insert into ";
   private static final String TRIM_XML_START =
@@ -62,6 +65,16 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
   private static final String UPDATE_TRIM_START = "<trim  suffixOverrides=\",\">";
   private static final String WHERE_START = "<where> ";
   private static final String WHERE_END = "</where> ";
+  private static final String DELETE_XML_START = "<delete id=\"delete\" parameterType=\"";
+  private static final String DELETE_XML_END = "</delete>";
+  private static final String DELETE_SQL = "delete from  ";
+  private static final String QUERY_XML_START = "<select id=\"queryPage\" parameterType=\"";
+  private static final String QUERY_ID_XML_START = "<select id=\"queryById\" parameterType=\"";
+  private static final String QUERY_XML_END = "</select>";
+  private static final String QUERY_RSP_MAPPER = "\" resultMap=\"";
+  private static final String QUERY_SQL = "select ";
+  private static final String QUERY_KEY_FROM = " from ";
+  private static final String KEY_AND = " and ";
 
   /**
    * 用来进行mybatis的xml文件的生成 方法描述
@@ -100,13 +113,17 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       String tableName = entry.getKey();
       TableInfoDTO tableMsg = context.getTableMap().get(tableName);
       StringBuilder sb = new StringBuilder();
-      List<TableColumnDTO> tcolumnList = entry.getValue();
+      String javaClassName = toJavaClassName(tableName);
+      String resultMapId = this.toJava(tableName) + RESULT_SUFFIX_NAME;
+
+      List<TableColumnDTO> columnList = entry.getValue();
       // 获取当前主键列表
-      List<TableColumnDTO> primaryKeyList = getPrimaryKey(tcolumnList);
+      List<TableColumnDTO> primaryKeyList = getPrimaryKey(columnList);
       // 获取po的完整路径
       String beanParam =
           basePackage
               + JavaCodeRepositoryPoCreate.REPOSITORY_PO_PACKAGE
+              + Symbol.POINT
               + toJavaClassName(tableName)
               + JavaCodeRepositoryPoCreate.REPOSITORY_PO;
       // 定义头
@@ -124,8 +141,6 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
           .append(MyBatisKey.DOC_END)
           .append(NEXT_LINE);
 
-      String javaClassName = toJavaClassName(tableName);
-
       // 基础包信息
       String packageStr =
           JavaCodeRepositoryDaoInfCreate.DAO_PACKAGE
@@ -133,98 +148,35 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
               + javaClassName
               + JavaCodeRepositoryDaoInfCreate.DAO_SUFFIX;
 
+      // 定义命名空间
       sb.append(NAMESPACE_START)
           .append(mybatisNamespace)
           .append(packageStr)
+          .append(Symbol.QUOTE)
           .append(MyBatisKey.END)
           .append(NEXT_LINE);
 
-      String resultMapId = this.toJava(tableName) + REUSLT_SUFFIX_NAME;
-
       // 定义查询结果集
-      queryResponse(sb, beanParam, resultMapId, tcolumnList, primaryKeyList);
+      queryResponse(sb, beanParam, resultMapId, columnList, primaryKeyList);
       // 插入数据的方法
-      insertMethod(sb, tableMsg, beanParam, tcolumnList);
+      insertMethod(sb, tableMsg, beanParam, columnList);
       // 修改数据的方法
-      updateMethod(sb, tableMsg, beanParam, tcolumnList, primaryKeyList);
+      updateMethod(sb, tableMsg, beanParam, columnList, primaryKeyList);
+      // 删除的方法
+      deleteMethod(sb, tableMsg, beanParam, primaryKeyList);
+      // 查询的方法
+      queryMethod(sb, tableMsg, beanParam, resultMapId, columnList, primaryKeyList);
 
-      // 删除
-      sb.append(formatMsg(1)).append("<!--").append(tableMsg.getTableComment());
-      sb.append("(").append(tableName).append(")删除操作").append("-->").append(NEXT_LINE);
-
-      sb.append(formatMsg(1))
-          .append("<delete id=\"delete\" parameterType=\"" + beanParam + "\">" + NEXT_LINE);
-      sb.append(formatMsg(2)).append("delete from  ");
-      sb.append(tableName).append(NEXT_LINE);
-      sb.append(formatMsg(2)).append("<where>" + NEXT_LINE);
-      // 以主键做条件
-      sb.append(this.addDeleteWhere(primaryKeyList, 3));
-      sb.append(formatMsg(2)).append("</where>").append(NEXT_LINE);
-      sb.append(formatMsg(1)).append("</delete>").append(NEXT_LINE);
-
-      sb.append(NEXT_LINE);
-
-      // 查询
-      sb.append(formatMsg(1)).append("<!--").append(tableMsg.getTableComment());
-      sb.append("(").append(tableName).append(")查询操作").append("-->").append(NEXT_LINE);
-
-      sb.append(formatMsg(1))
-          .append(
-              "<select id=\"query\" parameterType=\""
-                  + beanParam
-                  + "\" resultMap=\""
-                  + resultMapId
-                  + "\">"
-                  + NEXT_LINE);
-      sb.append(formatMsg(2)).append("select ").append(NEXT_LINE);
-
-      for (int i = 0; i < tcolumnList.size(); i++) {
-        String coumnName = tcolumnList.get(i).getColumnName();
-        sb.append(formatMsg(2)).append(coumnName);
-        if (i != tcolumnList.size() - 1) {
-          sb.append("," + NEXT_LINE);
-        }
+      // 当前查询如果为单主键，则添加根据id的查询方法
+      if (primaryKeyList != null && primaryKeyList.size() <= CreateCfg.ONE_KEY_FLAG) {
+        this.queryByIdMethod(sb, tableMsg, beanParam, resultMapId, columnList, primaryKeyList);
       }
-      sb.append(NEXT_LINE);
-      sb.append(formatMsg(2)).append("  from  ").append(NEXT_LINE);
-      sb.append(formatMsg(2)).append(tableName).append(NEXT_LINE);
-      sb.append(formatMsg(2)).append("<where>").append(NEXT_LINE);
-      for (int i = 0; i < tcolumnList.size(); i++) {
-        // 添加列注释信息
-        sb.append(formatMsg(3)).append("<!--").append(tcolumnList.get(i).getColumnMsg());
-        sb.append("-->").append(NEXT_LINE);
 
-        sb.append(this.addWhere(tcolumnList.get(i), 3));
-      }
-      sb.append(formatMsg(2)).append("</where>" + NEXT_LINE);
-      sb.append(formatMsg(1)).append("</select>").append(NEXT_LINE);
-      sb.append(NEXT_LINE);
+      sb.append(NAMESPACE_END);
 
-      sb.append("</mapper>");
-
-      FileWriter fw = new FileWriter(new File(path + toJavaClassName(tableName) + "Mapper.xml"));
-      fw.write(sb.toString());
-      fw.close();
+      String fileOut = path + toJavaClassName(tableName) + MYBATIS_SUFFIX_NAME;
+      FileUtils.writeFile(fileOut, sb);
     }
-  }
-
-  /**
-   * 添加条件信息信息
-   *
-   * @param primaryKeyList 主键列表
-   * @param tabNum
-   * @return
-   */
-  protected String addWhere(List<TableColumnDTO> primaryKeyList, int tabNum) {
-
-    StringBuilder sb = new StringBuilder();
-
-    for (TableColumnDTO tableMaper : primaryKeyList) {
-      // 添加条件
-      sb.append(this.addWhere(tableMaper, tabNum));
-    }
-
-    return sb.toString();
   }
 
   /**
@@ -244,11 +196,29 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
 
     // 获取类型判断信息
     String switchStr = this.switchType(tableColumn, javaName);
-    sb.append(formatMsg(tabNum)).append("<if test=\" " + switchStr + " \">" + NEXT_LINE);
+
+    // 值的判断操作
+    sb.append(formatMsg(tabNum))
+        .append(IF_START)
+        .append(switchStr)
+        .append(Symbol.QUOTE)
+        .append(MyBatisKey.END)
+        .append(NEXT_LINE);
+    // 添加where的条件项
     sb.append(formatMsg(tabNum + 1))
-        .append(
-            "and " + coumnName + " = #{" + javaName + ",jdbcType=" + typeName + "}" + NEXT_LINE);
-    sb.append(formatMsg(tabNum)).append("</if>" + NEXT_LINE);
+        .append(KEY_AND)
+        .append(coumnName)
+        .append(Symbol.SPACE)
+        .append(Symbol.EQUAL)
+        .append(Symbol.POUND)
+        .append(Symbol.BRACE_LEFT)
+        .append(javaName)
+        .append(JDBC_TYPE)
+        .append(typeName)
+        .append(Symbol.BRACE_RIGHT)
+        .append(NEXT_LINE);
+
+    sb.append(formatMsg(tabNum)).append(IF_END).append(NEXT_LINE);
 
     return sb.toString();
   }
@@ -280,14 +250,25 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
         sb.append(Symbol.SPACE);
       }
 
-      sb.append(coumnName + " = #{" + javaName + ",jdbcType=" + typeName + "}" + NEXT_LINE);
+      // 添加列相关的信息
+      sb.append(coumnName)
+          .append(Symbol.SPACE)
+          .append(Symbol.EQUAL)
+          .append(Symbol.SPACE)
+          .append(Symbol.POUND)
+          .append(Symbol.BRACE_LEFT)
+          .append(javaName)
+          .append(JDBC_TYPE)
+          .append(typeName)
+          .append(Symbol.BRACE_RIGHT)
+          .append(NEXT_LINE);
     }
     return sb.toString();
   }
 
   @Override
   public void autoCode(CreateParamBean param) {
-    String daoImplPath = param.getFileBasePath() + "beanMapper/";
+    String daoImplPath = param.getFileBasePath() + OUT_DIR + Symbol.PATH;
 
     try {
       this.mybatisCode(
@@ -333,10 +314,10 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
   /**
    * 进行类型的判断
    *
-   * @param tableMaper
+   * @param tableMapper
    * @param javaPropertiesName
    */
-  private String switchType(TableColumnDTO tableMaper, String javaPropertiesName) {
+  private String switchType(TableColumnDTO tableMapper, String javaPropertiesName) {
 
     String switchStr = null;
     // 检查类型是否为varchar类型
@@ -345,7 +326,7 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
             DatabaseTypeEnum.DATABASE_MYSQL, DatabaseTypeSourceEnum.DATABASE_TYPE_VARCHAR);
 
     boolean varcharFlag =
-        typeBo.getDbType().equalsIgnoreCase(tableMaper.getDataType()) ? true : false;
+        typeBo.getDbType().equalsIgnoreCase(tableMapper.getDataType()) ? true : false;
 
     // 检查类型是否为timestamp类型
     DatabaseTypeMsgBO timestampBo =
@@ -353,19 +334,37 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
             DatabaseTypeEnum.DATABASE_MYSQL, DatabaseTypeSourceEnum.DATABASE_TYPE_TIMESTAMP);
 
     boolean timestampFlag =
-        timestampBo.getDbType().equalsIgnoreCase(tableMaper.getDataType()) ? true : false;
+        timestampBo.getDbType().equalsIgnoreCase(tableMapper.getDataType()) ? true : false;
 
     // 检查char类型
     DatabaseTypeMsgBO charBo =
         DataTypeResource.INSTANCE.getTargetTypeinfo(
             DatabaseTypeEnum.DATABASE_MYSQL, DatabaseTypeSourceEnum.DATABASE_TYPE_CHAR);
 
-    boolean charFlag = charBo.getDbType().equalsIgnoreCase(tableMaper.getDataType()) ? true : false;
+    boolean charFlag =
+        charBo.getDbType().equalsIgnoreCase(tableMapper.getDataType()) ? true : false;
 
     if (varcharFlag || timestampFlag || charFlag) {
-      switchStr = javaPropertiesName + " != null and '' != " + javaPropertiesName;
+      switchStr =
+          javaPropertiesName
+              + Symbol.SPACE
+              + Symbol.EQUAL_NOT
+              + Symbol.SPACE
+              + MyBatisKey.NULL_VALUE
+              + Symbol.SPACE
+              + SqlKeyEnum.AND.getKey()
+              + Symbol.SPACE
+              + MyBatisKey.EMPTY_VALUE
+              + Symbol.EQUAL_NOT
+              + Symbol.SPACE
+              + javaPropertiesName;
     } else {
-      switchStr = javaPropertiesName + " != null ";
+      switchStr =
+          javaPropertiesName
+              + Symbol.SPACE
+              + Symbol.EQUAL_NOT
+              + Symbol.SPACE
+              + MyBatisKey.NULL_VALUE;
     }
 
     return switchStr;
@@ -375,12 +374,12 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       StringBuilder sb,
       String beanParam,
       String resultMapId,
-      List<TableColumnDTO> tcolumnList,
+      List<TableColumnDTO> columnList,
       List<TableColumnDTO> primaryKeyList) {
 
     // 定义resultmap信息
     sb.append(formatMsg(1))
-        .append(RESULTMAP)
+        .append(RESULT_MAP)
         .append(beanParam)
         .append(Symbol.QUOTE)
         .append(Symbol.SPACE)
@@ -392,7 +391,7 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
         .append(MyBatisKey.END)
         .append(NEXT_LINE);
 
-    List<TableColumnDTO> delKeyList = tcolumnList;
+    List<TableColumnDTO> delKeyList = columnList;
     // 定义主键信息
     for (TableColumnDTO tableColumn : primaryKeyList) {
 
@@ -406,8 +405,7 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       // 定义列的对应
       sb.append(formatMsg(2))
           .append(MyBatisKey.START)
-          .append(Symbol.SPACE)
-          .append(PROPERTY)
+          .append(ID_PROPERTY)
           .append(Symbol.EQUAL)
           .append(Symbol.QUOTE)
           .append(toJava(tableColumn.getColumnName()))
@@ -455,11 +453,11 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     }
 
     // 结束
-    sb.append(formatMsg(1)).append(RESULTMAP_END).append(NEXT_LINE);
+    sb.append(formatMsg(1)).append(RESULT_MAP_END).append(NEXT_LINE);
   }
 
   private void insertMethod(
-      StringBuilder sb, TableInfoDTO tableMsg, String beanParam, List<TableColumnDTO> tcolumnList) {
+      StringBuilder sb, TableInfoDTO tableMsg, String beanParam, List<TableColumnDTO> columnList) {
     // 添加操作的注释
     sb.append(formatMsg(1))
         .append(MyBatisKey.DOC_START)
@@ -486,8 +484,8 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     // 清除多余的逗号
     sb.append(formatMsg(2)).append(TRIM_XML_START).append(NEXT_LINE);
 
-    for (int i = 0; i < tcolumnList.size(); i++) {
-      TableColumnDTO tableMaper = tcolumnList.get(i);
+    for (int i = 0; i < columnList.size(); i++) {
+      TableColumnDTO tableMaper = columnList.get(i);
       String coumnName = tableMaper.getColumnName();
       String javaName = toJava(coumnName);
       // 添加列注释信息
@@ -505,14 +503,15 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
           .append(IF_START)
           .append(switchStr)
           .append(Symbol.QUOTE)
-          .append(MyBatisKey.END);
+          .append(MyBatisKey.END)
+          .append(NEXT_LINE);
       sb.append(formatMsg(4)).append(coumnName).append(Symbol.COMMA).append(NEXT_LINE);
       sb.append(formatMsg(3)).append(IF_END).append(NEXT_LINE);
     }
     sb.append(formatMsg(2)).append(TRIM_XML_END).append(NEXT_LINE);
     sb.append(formatMsg(2)).append(TRIM_VALUE_XML_START).append(NEXT_LINE);
-    for (int i = 0; i < tcolumnList.size(); i++) {
-      TableColumnDTO tableMaper = tcolumnList.get(i);
+    for (int i = 0; i < columnList.size(); i++) {
+      TableColumnDTO tableMaper = columnList.get(i);
       String coumnName = tableMaper.getColumnName();
       String javaName = toJava(coumnName);
       String typeName = tableMaper.getDataType();
@@ -536,10 +535,11 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
           .append(NEXT_LINE);
       sb.append(formatMsg(4))
           .append(Symbol.POUND)
-          .append(Symbol.BRACK_LEFT)
+          .append(Symbol.BRACE_LEFT)
           .append(javaName)
           .append(JDBC_TYPE)
-          .append(Symbol.BRACK_RIGHT);
+          .append(typeName)
+          .append(Symbol.BRACE_RIGHT);
 
       sb.append(Symbol.COMMA);
       sb.append(NEXT_LINE);
@@ -556,14 +556,14 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
    * @param sb
    * @param tableMsg
    * @param beanParam
-   * @param tcolumnList
+   * @param columnList
    * @param primaryKeyList
    */
   private void updateMethod(
       StringBuilder sb,
       TableInfoDTO tableMsg,
       String beanParam,
-      List<TableColumnDTO> tcolumnList,
+      List<TableColumnDTO> columnList,
       List<TableColumnDTO> primaryKeyList) {
     // 修改
     sb.append(formatMsg(1))
@@ -593,8 +593,8 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     sb.append(formatMsg(2)).append(UPDATE_SET).append(NEXT_LINE);
     // trim开始
     sb.append(formatMsg(3)).append(UPDATE_TRIM_START).append(NEXT_LINE);
-    for (int i = 0; i < tcolumnList.size(); i++) {
-      TableColumnDTO tableMaper = tcolumnList.get(i);
+    for (int i = 0; i < columnList.size(); i++) {
+      TableColumnDTO tableMaper = columnList.get(i);
       String columnName = tableMaper.getColumnName();
       String javaName = toJava(columnName);
       String typeName = tableMaper.getDataType();
@@ -619,13 +619,17 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       sb.append(formatMsg(5))
           .append(Symbol.SPACE)
           .append(columnName)
+          .append(Symbol.SPACE)
+          .append(Symbol.EQUAL)
+          .append(Symbol.SPACE)
           .append(Symbol.POUND)
-          .append(Symbol.BRACK_LEFT)
+          .append(Symbol.BRACE_LEFT)
           .append(javaName)
           .append(JDBC_TYPE)
           .append(typeName)
-          .append(Symbol.BRACK_RIGHT)
-          .append(Symbol.COMMA);
+          .append(Symbol.BRACE_RIGHT)
+          .append(Symbol.COMMA)
+          .append(NEXT_LINE);
 
       sb.append(formatMsg(4)).append(IF_END).append(NEXT_LINE);
     }
@@ -639,5 +643,156 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     sb.append(formatMsg(1)).append(UPDDATE_XML_END).append(NEXT_LINE);
 
     sb.append(NEXT_LINE);
+  }
+
+  private void deleteMethod(
+      StringBuilder sb,
+      TableInfoDTO tableMsg,
+      String beanParam,
+      List<TableColumnDTO> primaryKeyList) {
+
+    // 删除
+    sb.append(formatMsg(1))
+        .append(MyBatisKey.DOC_START)
+        .append(tableMsg.getTableComment())
+        .append(Symbol.BRACKET_LEFT)
+        .append(tableMsg.getTableName())
+        .append(Symbol.BRACKET_RIGHT)
+        .append(OPER_DEL)
+        .append(MyBatisKey.DOC_END)
+        .append(NEXT_LINE);
+
+    // 删除的xml文件的开始
+    sb.append(formatMsg(1))
+        .append(DELETE_XML_START)
+        .append(beanParam)
+        .append(Symbol.QUOTE)
+        .append(MyBatisKey.END)
+        .append(NEXT_LINE);
+
+    sb.append(formatMsg(2)).append(DELETE_SQL).append(tableMsg.getTableName()).append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(WHERE_START).append(NEXT_LINE);
+    // 以主键做条件
+    sb.append(this.addDeleteWhere(primaryKeyList, 3));
+    sb.append(formatMsg(2)).append(WHERE_END).append(NEXT_LINE);
+    sb.append(formatMsg(1)).append(DELETE_XML_END).append(NEXT_LINE);
+
+    sb.append(NEXT_LINE);
+  }
+
+  private void queryMethod(
+      StringBuilder sb,
+      TableInfoDTO tableMsg,
+      String beanParam,
+      String resultMapId,
+      List<TableColumnDTO> columnList,
+      List<TableColumnDTO> keyColumn) {
+    // 查询注释
+    sb.append(formatMsg(1))
+        .append(MyBatisKey.DOC_START)
+        .append(tableMsg.getTableComment())
+        .append(Symbol.BRACKET_LEFT)
+        .append(tableMsg.getTableName())
+        .append(Symbol.BRACKET_RIGHT)
+        .append(OPER_QRY)
+        .append(MyBatisKey.DOC_END)
+        .append(NEXT_LINE);
+
+    // 查询开始
+    sb.append(formatMsg(1))
+        .append(QUERY_XML_START)
+        .append(beanParam)
+        .append(QUERY_RSP_MAPPER)
+        .append(resultMapId)
+        .append(Symbol.QUOTE)
+        .append(MyBatisKey.END)
+        .append(NEXT_LINE);
+
+    // 查询的列字段
+    sb.append(formatMsg(2)).append(QUERY_SQL).append(NEXT_LINE);
+    for (int i = 0; i < columnList.size(); i++) {
+      String columnName = columnList.get(i).getColumnName();
+      sb.append(formatMsg(2)).append(columnName);
+      if (i != columnList.size() - 1) {
+        sb.append(Symbol.COMMA).append(NEXT_LINE);
+      }
+    }
+    sb.append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(QUERY_KEY_FROM).append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(tableMsg.getTableName()).append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(WHERE_START).append(NEXT_LINE);
+    // 添加where条件
+    for (int i = 0; i < keyColumn.size(); i++) {
+      // 添加列注释信息
+      sb.append(formatMsg(3))
+          .append(MyBatisKey.DOC_START)
+          .append(keyColumn.get(i).getColumnMsg())
+          .append(MyBatisKey.DOC_END)
+          .append(NEXT_LINE);
+      sb.append(this.addWhere(keyColumn.get(i), 3));
+    }
+    sb.append(formatMsg(2)).append(WHERE_END).append(NEXT_LINE);
+    sb.append(formatMsg(1)).append(QUERY_XML_END).append(NEXT_LINE);
+    sb.append(NEXT_LINE);
+  }
+
+  private void queryByIdMethod(
+      StringBuilder sb,
+      TableInfoDTO tableMsg,
+      String beanParam,
+      String resultMapId,
+      List<TableColumnDTO> columnList,
+      List<TableColumnDTO> keyColumn) {
+    // 查询注释
+    sb.append(formatMsg(1))
+        .append(MyBatisKey.DOC_START)
+        .append(tableMsg.getTableComment())
+        .append(Symbol.BRACKET_LEFT)
+        .append(tableMsg.getTableName())
+        .append(Symbol.BRACKET_RIGHT)
+        .append(OPER_QRY_ID)
+        .append(MyBatisKey.DOC_END)
+        .append(NEXT_LINE);
+
+    String paramType = getKeyType(keyColumn.get(0));
+
+    // 查询开始
+    sb.append(formatMsg(1))
+        .append(QUERY_ID_XML_START)
+        .append(paramType)
+        .append(QUERY_RSP_MAPPER)
+        .append(resultMapId)
+        .append(Symbol.QUOTE)
+        .append(MyBatisKey.END)
+        .append(NEXT_LINE);
+
+    // 查询的列字段
+    sb.append(formatMsg(2)).append(QUERY_SQL).append(NEXT_LINE);
+    for (int i = 0; i < columnList.size(); i++) {
+      String columnName = columnList.get(i).getColumnName();
+      sb.append(formatMsg(2)).append(columnName);
+      if (i != columnList.size() - 1) {
+        sb.append(Symbol.COMMA).append(NEXT_LINE);
+      }
+    }
+    sb.append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(QUERY_KEY_FROM).append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(tableMsg.getTableName()).append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(WHERE_START).append(NEXT_LINE);
+    // 添加where条件 以主键做条件
+    sb.append(this.addDeleteWhere(keyColumn, 3));
+
+    sb.append(formatMsg(2)).append(WHERE_END).append(NEXT_LINE);
+    sb.append(formatMsg(1)).append(QUERY_XML_END).append(NEXT_LINE);
+    sb.append(NEXT_LINE);
+  }
+
+  private String getKeyType(TableColumnDTO key) {
+    // 获取主键的java类型
+    String tempType = key.getDataType().toLowerCase();
+    // 1,从数据库的类型中获取
+    StandardTypeEnum standardType = MysqlDataTypeEnum.databaseToStandKey(tempType);
+    // 类型信息
+    return MybatisParamTypeEnum.getMybatisParamType(standardType);
   }
 }

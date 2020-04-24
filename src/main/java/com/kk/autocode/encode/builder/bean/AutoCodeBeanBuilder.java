@@ -114,6 +114,12 @@ public class AutoCodeBeanBuilder implements AutoCodeBuilderInf {
     return this;
   }
 
+  /** 添加微服务数据库实体与领域层的数据转换对象 */
+  public AutoCodeBeanBuilder addMicorServicePOassembler() {
+    this.autoList.add(new JavaCodePOAssemblerCreate());
+    return this;
+  }
+
   /** 添加微服务的前端领域层实体 */
   public AutoCodeBeanBuilder addMicorServiceRepositoryDo() {
     this.autoList.add(new JavaCodeDOCreate());

@@ -50,6 +50,9 @@ public class CodeCreateMicroServiceRun {
     // 生成领域层实体
     builer.addMicorServiceRepositoryDo();
 
+    // 添加持久层与领域层的代码转化
+    builer.addMicorServicePOassembler();
+
     // 生成数据库mapper文件信息
     builer.addMicroServiceRepositoryMapper();
 

@@ -16,31 +16,31 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * 创建数据库访问层的PO对象
+ * 数据库实体与领域层的对象转换
  *
  * @author liujun
  * @version 0.0.1
  * @since 2020/04/08
  */
-public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements AutoCodeInf {
+public class JavaCodePOAssemblerCreate extends TableProcessBase implements AutoCodeInf {
 
-  private static final String DOC_ANNO_MSG = "的实体实体与领域层转化";
+  private static final String DOC_ANNO_MSG = "的数据库实体与领域实体转化";
 
-  private static final String FILE_PATH = "interfacesDtoAssembler";
+  private static final String FILE_PATH = "repositoryDoAssembler";
 
-  /** 领域层的方法 */
+  /** 将领域数据转换为领域数据 */
+  private static final String TOPO = "topo";
+
   private static final String TODO = "todo";
 
-  private static final String TODTO = "todto";
-
-  private static final String DTO_NAME = "dto";
+  private static final String PO_NAME = "po";
   private static final String DOMAIN_NAME = "doEntity";
 
   /** 传输层的实体名称 */
-  public static final String ASSEMBLER_DTO_PACKAGE = "interfaces.assembler";
+  public static final String ASSEMBLER_DTO_PACKAGE = "repository.assembler";
 
   /** 实体转化的后缀名 */
-  public static final String ASSEMBLER_PO = "DTOAssembler";
+  public static final String ASSEMBLER_PO = "POAssembler";
 
   /** 文件路径信息 */
   private String filePath;
@@ -79,8 +79,8 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
       String serviceName = tableClassName;
       String className = serviceName + ASSEMBLER_PO;
 
-      // dto的传输层的类名
-      String dtoClassName = tableClassName + JavaCodeDTOCreate.REPOSITORY_PO;
+      // po的传输层的类名
+      String poClassName = tableClassName + JavaCodeRepositoryPoCreate.REPOSITORY_PO;
       // do领域层的类名
       String doClassName = tableClassName + JavaCodeDOCreate.DOMAIN_DO;
 
@@ -101,7 +101,7 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
           .append(basePackageStr)
           .append(JavaCodeDTOCreate.REPOSITORY_DTO_PACKAGE)
           .append(Symbol.POINT)
-          .append(dtoClassName)
+          .append(poClassName)
           .append(Symbol.SEMICOLON)
           .append(NEXT_LINE);
       // 导入领域层的包
@@ -139,12 +139,12 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
       sb.append(NEXT_LINE);
 
       // 添加将数据转化为领域对象的服务
-      setdoentityData(sb, doClassName, dtoClassName, columnList);
+      setdoentityData(sb, doClassName, poClassName, columnList);
 
       sb.append(NEXT_LINE);
       sb.append(NEXT_LINE);
 
-      setDtoData(sb, doClassName, dtoClassName, columnList);
+      setPOData(sb, doClassName, poClassName, columnList);
 
       // 结束
       sb.append(Symbol.BRACE_RIGHT);
@@ -155,13 +155,13 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
   }
 
   private void setdoentityData(
-      StringBuilder sb, String doClassName, String dtoClassName, List<TableColumnDTO> columnList) {
+      StringBuilder sb, String doClassName, String poClassName, List<TableColumnDTO> columnList) {
 
     // 添加toDo方法，即将数据转化为领域层对象
     sb.append(formatMsg(1)).append(JavaCodeKey.ANNO_CLASS).append(NEXT_LINE);
     sb.append(formatMsg(1))
         .append(JavaCodeKey.ANNO_CLASS_MID)
-        .append("将传输层的对象转化为领域层的对象")
+        .append("将持久层的对象转化为领域层的对象")
         .append(NEXT_LINE);
     sb.append(formatMsg(1)).append(JavaCodeKey.ANNO_OVER).append(NEXT_LINE);
     sb.append(formatMsg(1))
@@ -173,9 +173,9 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
         .append(Symbol.SPACE)
         .append(TODO)
         .append(Symbol.BRACKET_LEFT)
-        .append(dtoClassName)
+        .append(poClassName)
         .append(Symbol.SPACE)
-        .append(DTO_NAME)
+        .append(PO_NAME)
         .append(Symbol.BRACKET_RIGHT)
         .append(Symbol.BRACE_LEFT)
         .append(NEXT_LINE);
@@ -207,7 +207,7 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
           .append(BusiJavaCodeKey.SET)
           .append(javaName)
           .append(Symbol.BRACKET_LEFT)
-          .append(DTO_NAME)
+          .append(PO_NAME)
           .append(Symbol.POINT)
           .append(BusiJavaCodeKey.GET)
           .append(javaName)
@@ -232,17 +232,17 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
    *
    * @param sb
    * @param doClassName
-   * @param dtoClassName
+   * @param poClassName
    * @param columnList
    */
-  private void setDtoData(
-      StringBuilder sb, String doClassName, String dtoClassName, List<TableColumnDTO> columnList) {
+  private void setPOData(
+      StringBuilder sb, String doClassName, String poClassName, List<TableColumnDTO> columnList) {
 
     // 添加toDo方法，即将数据转化为领域层对象
     sb.append(formatMsg(1)).append(JavaCodeKey.ANNO_CLASS).append(NEXT_LINE);
     sb.append(formatMsg(1))
         .append(JavaCodeKey.ANNO_CLASS_MID)
-        .append("将领域层的对象转换为传输层对象")
+        .append("将领域层的对象转换为持久层的实体")
         .append(NEXT_LINE);
     sb.append(formatMsg(1)).append(JavaCodeKey.ANNO_OVER).append(NEXT_LINE);
     sb.append(formatMsg(1))
@@ -250,9 +250,9 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
         .append(Symbol.SPACE)
         .append(JavaCodeKey.STATIC)
         .append(Symbol.SPACE)
-        .append(dtoClassName)
+        .append(poClassName)
         .append(Symbol.SPACE)
-        .append(TODTO)
+        .append(TOPO)
         .append(Symbol.BRACKET_LEFT)
         .append(doClassName)
         .append(Symbol.SPACE)
@@ -263,15 +263,15 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
 
     // 声明领域层实体对象
     sb.append(formatMsg(2))
-        .append(dtoClassName)
+        .append(poClassName)
         .append(Symbol.SPACE)
-        .append(DTO_NAME)
+        .append(PO_NAME)
         .append(Symbol.SPACE)
         .append(Symbol.EQUAL)
         .append(Symbol.SPACE)
         .append(JavaCodeKey.NEW)
         .append(Symbol.SPACE)
-        .append(dtoClassName)
+        .append(poClassName)
         .append(Symbol.BRACKET_LEFT)
         .append(Symbol.BRACKET_RIGHT)
         .append(Symbol.SEMICOLON)
@@ -283,7 +283,7 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
       String javaName = toProJavaName(tableBean.getColumnName());
 
       sb.append(formatMsg(2))
-          .append(DTO_NAME)
+          .append(PO_NAME)
           .append(Symbol.POINT)
           .append(BusiJavaCodeKey.SET)
           .append(javaName)
@@ -302,7 +302,7 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
     sb.append(formatMsg(2))
         .append(JavaCodeKey.RETURN)
         .append(Symbol.SPACE)
-        .append(DTO_NAME)
+        .append(PO_NAME)
         .append(Symbol.SEMICOLON)
         .append(NEXT_LINE);
     sb.append(formatMsg(1)).append(Symbol.BRACE_RIGHT).append(NEXT_LINE);

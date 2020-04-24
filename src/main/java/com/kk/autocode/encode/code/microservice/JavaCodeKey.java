@@ -27,6 +27,11 @@ public class JavaCodeKey {
 
   public static final String INTERFACE = "interface";
 
+  /** private 关键字 */
+  public static final String PRIVATE = "private";
+
+  public static final String STATIC = "static";
+
   /** 类注释开始 */
   public static final String ANNO_CLASS = "/**";
 
@@ -42,9 +47,6 @@ public class JavaCodeKey {
 
   /** 类开头 */
   public static final String ClASS_START = "public class ";
-
-  /** private 关键字 */
-  public static final String PRIVATE = "private";
 
   /** 用来生成get和set方法 */
   public static final String BEAN_IMPORT_DATA = "import lombok.Data;";

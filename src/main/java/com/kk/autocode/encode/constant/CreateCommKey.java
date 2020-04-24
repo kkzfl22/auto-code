@@ -6,6 +6,9 @@ package com.kk.autocode.encode.constant;
  */
 public enum CreateCommKey {
   JUNIT_IMPORT_KEY("junit_import_key"),
+
+  /** 用于标识基础的路径 */
+  BASE_PATH("base_path"),
   ;
 
   private String key;

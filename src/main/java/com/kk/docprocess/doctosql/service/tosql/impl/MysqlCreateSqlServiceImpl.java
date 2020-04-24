@@ -70,8 +70,7 @@ public class MysqlCreateSqlServiceImpl implements CreateSqlService {
     sql.append("create table ").append(word.getTableName()).append("").append(LINE);
     sql.append("(").append(LINE);
 
-    word.getColumnList()
-        .stream()
+    word.getColumnList().stream()
         .forEach(
             s -> {
               // 如果当前名称为空，则跳过
@@ -117,7 +116,9 @@ public class MysqlCreateSqlServiceImpl implements CreateSqlService {
       PkName = PkName.replaceAll(",", "_");
       PkName = PkName.replaceAll(" ", "");
       String pkName = "PK_" + word.getTableName() + PkName;
-      sql.append(TAB).append("constraint ").append(pkName);
+      sql.append(TAB);
+      // 不再输出主键定义的名称
+      // .append("constraint ").append(pkName);
       sql.append("  primary key (").append(word.getPrimaryKey()).append(")");
     } else {
       sql.setCharAt(sql.length() - LINE.length() - 1, ' ');

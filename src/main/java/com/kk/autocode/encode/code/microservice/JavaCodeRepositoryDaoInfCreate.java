@@ -5,6 +5,7 @@ import com.kk.autocode.encode.bean.CreateParamBean;
 import com.kk.autocode.encode.bean.EncodeContext;
 import com.kk.autocode.encode.code.AutoCodeInf;
 import com.kk.autocode.encode.constant.CreateCfg;
+import com.kk.autocode.encode.constant.SqlKeyEnum;
 import com.kk.autocode.encode.constant.Symbol;
 import com.kk.element.database.mysql.pojo.TableColumnDTO;
 import com.kk.element.database.mysql.pojo.TableInfoDTO;
@@ -25,7 +26,7 @@ import java.util.Map.Entry;
 public class JavaCodeRepositoryDaoInfCreate extends TableProcessBase implements AutoCodeInf {
 
   public static final String DAO_SUFFIX = "DAO";
-  public static final String DAO_PACKAGE = "mapper";
+  public static final String DAO_PACKAGE = "repository.mapper";
   public static final String DAO_NAME = "repositorydao";
 
   private static final String IMPORT_LIST = "import java.util.List;";
@@ -36,7 +37,7 @@ public class JavaCodeRepositoryDaoInfCreate extends TableProcessBase implements 
   private static final String QUERY_DOC = "分页查询操作";
   private static final String QUERY_ID_DOC = "根据id进行查询操作";
   private static final String METHOD_PARAM = " @param param ";
-  private static final String METHOD_PARAM_ID = " @param id ";
+  private static final String METHOD_PARAM_ID = " @param param ";
   private static final String METHOD_PARAM_DOC = "参数信息";
   private static final String METHOD_PARAM_ID_DOC = "主键查询参数信息";
   private static final String METHOD_RESULT = " @return 数据库影响的行数";
@@ -150,8 +151,8 @@ public class JavaCodeRepositoryDaoInfCreate extends TableProcessBase implements 
       this.queryPageMethod(sb, tableInfo, beanParam);
 
       // 当前查询如果为单主键，则添加根据id的查询方法
-      if (primaryKeyList != null && primaryKeyList.size() <= CreateCfg.ONE_KEY_FLAG) {
-        this.queryByIdMethod(sb, tableInfo, beanParam, primaryKeyList.get(0));
+      if (primaryKeyList != null) {
+        this.queryByIdMethod(sb, tableInfo, beanParam, primaryKeyList);
       }
 
       // 结束
@@ -369,7 +370,10 @@ public class JavaCodeRepositoryDaoInfCreate extends TableProcessBase implements 
    * @param beanParam
    */
   public void queryByIdMethod(
-      StringBuilder sb, TableInfoDTO tableInfo, String beanParam, TableColumnDTO primaryKey) {
+      StringBuilder sb,
+      TableInfoDTO tableInfo,
+      String beanParam,
+      List<TableColumnDTO> primaryKeyList) {
     // 普通查询查询
     sb.append(formatMsg(1)).append(JavaCodeKey.ANNO_CLASS).append(NEXT_LINE);
     sb.append(formatMsg(1))
@@ -394,21 +398,16 @@ public class JavaCodeRepositoryDaoInfCreate extends TableProcessBase implements 
         .append(NEXT_LINE);
     sb.append(formatMsg(1)).append(JavaCodeKey.ANNO_OVER).append(NEXT_LINE);
 
-    // 获取主键的java类型
-    String javaDataType = this.getJavaType(primaryKey);
-
     // 查询方法的定义
     sb.append(formatMsg(1))
         .append(beanParam)
         .append(Symbol.SPACE)
         .append(METHOD_QUERY_ID)
-        .append(Symbol.BRACKET_LEFT)
-        .append(javaDataType)
-        .append(Symbol.SPACE)
-        .append(METHOD_PARAM_ID_NAME)
-        .append(Symbol.BRACKET_RIGHT)
-        .append(Symbol.SEMICOLON)
-        .append(NEXT_LINE);
+        .append(Symbol.BRACKET_LEFT);
+
+    sb.append(beanParam).append(Symbol.SPACE).append(METHOD_PARAM_NAME);
+
+    sb.append(Symbol.BRACKET_RIGHT).append(Symbol.SEMICOLON).append(NEXT_LINE);
     sb.append(NEXT_LINE);
   }
 }

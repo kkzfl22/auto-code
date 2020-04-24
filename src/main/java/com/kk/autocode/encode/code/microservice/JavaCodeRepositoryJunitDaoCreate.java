@@ -146,8 +146,8 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
       queryMethod(sb, beanPoName, columnList);
 
       // 当前查询如果为单主键，则添加根据id的查询方法
-      if (primaryKeyList != null && primaryKeyList.size() <= CreateCfg.ONE_KEY_FLAG) {
-        this.queryByIdMethod(sb, beanPoName, columnList, primaryKeyList.get(0));
+      if (primaryKeyList != null) {
+        this.queryByIdMethod(sb, beanPoName, columnList, primaryKeyList);
       }
 
       // 删除方法
@@ -543,7 +543,7 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
       StringBuilder sb,
       String beanPoName,
       List<TableColumnDTO> columnList,
-      TableColumnDTO primaryKey) {
+      List<TableColumnDTO> primaryKey) {
     // 查询
     sb.append(formatMsg(1)).append(ANNO_TEST).append(NEXT_LINE);
     // 定义方法头
@@ -575,7 +575,7 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
     sb.append(NEXT_LINE);
 
     // 获取主键的java类型
-    String keyIdName = Symbol.POINT + GET_KEY + this.toProJavaName(primaryKey.getColumnName());
+    // String keyIdName = Symbol.POINT + GET_KEY + this.toProJavaName(primaryKey.getColumnName());
 
     // 执行查询
     sb.append(formatMsg(2))
@@ -590,9 +590,9 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
         .append(METHOD_QUERY_ID)
         .append(Symbol.BRACKET_LEFT)
         .append(INSTANCE_NAME_PO)
-        .append(keyIdName)
-        .append(Symbol.BRACKET_LEFT)
-        .append(Symbol.BRACKET_RIGHT)
+        // .append(keyIdName)
+        // .append(Symbol.BRACKET_LEFT)
+        // .append(Symbol.BRACKET_RIGHT)
         .append(Symbol.BRACKET_RIGHT)
         .append(Symbol.SEMICOLON)
         .append(NEXT_LINE);

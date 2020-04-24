@@ -115,22 +115,33 @@ public class AdapterDocProcessImpl implements AdapterDocProcess {
     ParamBase result = new ParamBase("1", "result", "boolean", "N", "", "当前操作是否成功,true成功,false失败");
     result.setDbType("boolean");
     commList.add(result);
-    ParamBase errorCode = new ParamBase("2", "errorCode", "int", "Y", "", "当前操作的错误码");
+    ParamBase errorCode = new ParamBase("2", "code", "int", "Y", "", "当前操作的错误码");
     errorCode.setDbType("int");
     commList.add(errorCode);
-    ParamBase errorMsg = new ParamBase("3", "errorMsg", "String", "Y", "", "错误信息");
+    ParamBase errorMsg = new ParamBase("3", "msg", "String", "Y", "", "错误信息");
     errorMsg.setDbType("varchar");
     commList.add(errorMsg);
 
-    if (ProcEnum.QUERY.getKey().equals(proc.getKey())
-        || ProcEnum.QUERYPAGE.getKey().equals(proc.getKey())) {
+    if (ProcEnum.QUERYPAGE.getKey().equals(proc.getKey())) {
       String className = NameProcess.INSTANCE.toJavaClassName(wordTableBean.getTableName());
       ParamBase count = new ParamBase("4", "count", "int", "Y", "", "查询结果的条数");
       count.setDbType("int");
       commList.add(count);
-      ParamBase list = new ParamBase("5", "list", className + "[]", "Y", "", "查询结果");
+      ParamBase list = new ParamBase("5", "data", className + "[]", "Y", "", "查询结果");
       list.setDbType("varchar");
       commList.add(list);
+    }
+
+    if (ProcEnum.QUERY.getKey().equals(proc.getKey())) {
+      String className = NameProcess.INSTANCE.toJavaClassName(wordTableBean.getTableName());
+      ParamBase count = new ParamBase("4", "count", "int", "Y", "", "查询结果的条数");
+      count.setDbType("int");
+      commList.add(count);
+      ParamBase list = new ParamBase("5", "data", className, "Y", "", "查询结果");
+      list.setDbType("varchar");
+      commList.add(list);
+
+      rsp.setFlag(ProcEnum.QUERY.getKey());
     }
 
     // 设置公共结果
@@ -177,7 +188,7 @@ public class AdapterDocProcessImpl implements AdapterDocProcess {
       paramBean.setParamSeq(String.valueOf(index));
       paramBean.setParamName(NameProcess.INSTANCE.toJava(tableColumnBean.getColumnName()));
       paramBean.setDbType(tableColumnBean.getType().toLowerCase());
-      paramBean.setParamType(TypeProcess.INSTANCE.getJavaType(tableColumnBean.getType()));
+      paramBean.setParamType(TypeProcess.INSTANCE.getJavaType(tableColumnBean.getDbType()));
       paramBean.setNullFlag(tableColumnBean.getIsNullFlag());
       paramBean.setMsg(tableColumnBean.getDesc());
 

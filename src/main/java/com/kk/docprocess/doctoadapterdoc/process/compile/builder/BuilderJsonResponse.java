@@ -1,6 +1,7 @@
 package com.kk.docprocess.doctoadapterdoc.process.compile.builder;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.kk.docprocess.doctoadapterdoc.bean.AdapterResponse;
@@ -26,14 +27,16 @@ import java.util.Arrays;
  */
 public class BuilderJsonResponse {
 
+  private static final String DATA = "data";
+
   /** 实例对象 */
   public static final BuilderJsonResponse INSTANCE = new BuilderJsonResponse();
 
   /** */
-  private Gson gson = new Gson();
+  private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public String buildResponse(AdapterResponse response) {
+  public String[] buildResponse(AdapterResponse response) {
 
     JsonObject result = new JsonObject();
 
@@ -44,18 +47,28 @@ public class BuilderJsonResponse {
       setProperties(tableBean, result);
     }
 
-    JsonArray array = new JsonArray();
-    JsonObject dataListObject = new JsonObject();
-
-    if (null != response.getRspDataList()) {
+    // 当检查到当前为查询详细标识时
+    if (null != response.getRspDataList() && ProcEnum.QUERY.getKey().equals(response.getFlag())) {
+      JsonObject dataListObject = new JsonObject();
       for (ParamBase paramData : response.getRspDataList()) {
         setProperties(paramData, dataListObject);
       }
-      array.add(dataListObject);
-      result.add("list", array);
+      result.add(DATA, dataListObject);
+    } else {
+      if (null != response.getRspDataList() && response.getRspDataList().size() > 1) {
+        JsonObject dataListObject = new JsonObject();
+        JsonArray array = new JsonArray();
+        for (ParamBase paramData : response.getRspDataList()) {
+          setProperties(paramData, dataListObject);
+        }
+        array.add(dataListObject);
+        result.add(DATA, array);
+      }
     }
 
-    return gson.toJson(result);
+    String dataValue = gson.toJson(result);
+
+    return dataValue.split("\n");
   }
 
   /**

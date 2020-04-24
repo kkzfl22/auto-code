@@ -21,17 +21,17 @@ import java.util.Map.Entry;
  * @version 0.0.1
  * @since 2020/04/08
  */
-public class JavaCodeRepositoryPoCreate extends TableProcessBase implements AutoCodeInf {
+public class JavaCodeDTOCreate extends TableProcessBase implements AutoCodeInf {
 
-  private static final String DOC_ANNO_MSG = "的实体信息";
+  private static final String DOC_ANNO_MSG = "的实体传输实体信息";
 
-  private static final String FILE_PATH = "repositorypo";
+  private static final String FILE_PATH = "interfacesdto";
 
-  /** 存储层po我名称 */
-  public static final String REPOSITORY_PO_PACKAGE = "repository.po";
+  /** 传输层的实体名称 */
+  public static final String REPOSITORY_DTO_PACKAGE = "interfaces.dto";
 
-  /** 用来生成存储层的实体名称 */
-  public static final String REPOSITORY_PO = "PO";
+  /** 实体的后缀名 */
+  public static final String REPOSITORY_PO = "DTO";
 
   /** 文件路径信息 */
   private String filePath;
@@ -72,7 +72,7 @@ public class JavaCodeRepositoryPoCreate extends TableProcessBase implements Auto
       sb.append(JavaCodeKey.PACKAGE)
           .append(Symbol.SPACE)
           .append(basePackageStr)
-          .append(REPOSITORY_PO_PACKAGE)
+          .append(REPOSITORY_DTO_PACKAGE)
           .append(Symbol.SEMICOLON)
           .append(NEXT_LINE);
       sb.append(NEXT_LINE);

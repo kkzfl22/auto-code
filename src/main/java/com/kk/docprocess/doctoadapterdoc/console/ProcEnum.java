@@ -15,11 +15,11 @@ public enum ProcEnum {
 
 	DELETE("delete", "删除操作"),
 
-	QUERY("query", "查询操作"),
+	QUERY("detail", "查询详细操作"),
 
 	QUERYPAGE("queryPage", "分页查询操作"),
 	
-	PROC_URL_SUFFIX("ActionWeb",""),
+	PROC_URL_SUFFIX("Action",""),
 
 	PROC_SUFFIX(".action", "请求的后缀名");
 

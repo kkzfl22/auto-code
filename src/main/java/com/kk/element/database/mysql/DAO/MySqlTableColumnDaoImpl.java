@@ -28,7 +28,8 @@ public class MySqlTableColumnDaoImpl {
   public List<TableColumnDTO> selectTableColumn(String databaseName) {
 
     StringBuilder sql = new StringBuilder();
-    sql.append("select table_name,column_name,data_type,COLUMN_COMMENT,COLUMN_KEY,EXTRA ");
+    sql.append("select table_name,column_name,data_type,COLUMN_COMMENT,COLUMN_KEY,EXTRA,");
+    sql.append("NUMERIC_PRECISION,NUMERIC_SCALE,CHARACTER_MAXIMUM_LENGTH,CHARACTER_OCTET_LENGTH  ");
     sql.append("from information_schema.COLUMNS where table_schema = '");
     sql.append(databaseName);
     sql.append("' order by table_name");

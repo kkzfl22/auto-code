@@ -56,6 +56,9 @@ public class SqlLiteCreateSqlServiceImpl implements CreateSqlService {
   public String toTableSqlFun(TableBean word) {
     StringBuilder sql = new StringBuilder();
 
+    // 添加注释
+    sql.append("-- ").append(word.getTableMsg()).append(LINE);
+
     if (IS_DROP) {
       sql.append("drop table IF EXISTS  ").append(word.getTableName()).append(";").append(LINE);
     }
@@ -102,8 +105,8 @@ public class SqlLiteCreateSqlServiceImpl implements CreateSqlService {
       String PkName = word.getPrimaryKey();
       PkName = PkName.replaceAll(",", "_");
       PkName = PkName.replaceAll(" ", "");
-      String pkName = "PK_" + word.getTableName() + PkName;
-      sql.append(TAB).append("constraint ").append(pkName);
+      // String pkName = "PK_" + word.getTableName() + PkName;
+      // sql.append(TAB).append("constraint ").append(pkName);
       sql.append("  primary key (").append(word.getPrimaryKey()).append(")");
     } else {
       sql.setCharAt(sql.length() - LINE.length() - 1, ' ');

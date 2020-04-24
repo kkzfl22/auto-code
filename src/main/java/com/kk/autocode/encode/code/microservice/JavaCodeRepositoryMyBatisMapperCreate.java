@@ -168,7 +168,7 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       queryMethod(sb, tableMsg, beanParam, resultMapId, columnList, primaryKeyList);
 
       // 当前查询如果为单主键，则添加根据id的查询方法
-      if (primaryKeyList != null && primaryKeyList.size() <= CreateCfg.ONE_KEY_FLAG) {
+      if (primaryKeyList != null) {
         this.queryByIdMethod(sb, tableMsg, beanParam, resultMapId, columnList, primaryKeyList);
       }
 
@@ -754,12 +754,10 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
         .append(MyBatisKey.DOC_END)
         .append(NEXT_LINE);
 
-    String paramType = getKeyType(keyColumn.get(0));
-
     // 查询开始
     sb.append(formatMsg(1))
         .append(QUERY_ID_XML_START)
-        .append(paramType)
+        .append(beanParam)
         .append(QUERY_RSP_MAPPER)
         .append(resultMapId)
         .append(Symbol.QUOTE)

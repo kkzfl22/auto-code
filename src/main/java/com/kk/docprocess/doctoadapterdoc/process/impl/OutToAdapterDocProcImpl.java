@@ -111,13 +111,13 @@ public class OutToAdapterDocProcImpl implements OutToAdapterDocProc {
           addStyleDoc(doc, "6", "请求");
 
           // 进行请求生成json格式的数据
-          String jsonReq = BuilderJsonRequest.INSTANCE.buildRequest(adapterBean.getRequest());
+          String[] jsonReq = BuilderJsonRequest.INSTANCE.buildRequest(adapterBean.getRequest());
           // 将json写入到word文件中
           addDoc(doc, jsonReq);
 
           // 将响应生成json格式的数据
           addStyleDoc(doc, "6", "响应");
-          String jsonRsp = BuilderJsonResponse.INSTANCE.buildResponse(adapterBean.getResponse());
+          String[] jsonRsp = BuilderJsonResponse.INSTANCE.buildResponse(adapterBean.getResponse());
           // 将json写入到word文件中
           addDoc(doc, jsonRsp);
         }
@@ -237,11 +237,32 @@ public class OutToAdapterDocProcImpl implements OutToAdapterDocProc {
    * @param value
    */
   private void addDoc(XWPFDocument doc, String value) {
+
     // 正文
     XWPFParagraph paraX = doc.createParagraph();
     XWPFRun runX = paraX.createRun();
+
     // 正文内容
     runX.setText(value);
+    runX.addCarriageReturn();
+  }
+
+  /**
+   * 添加正文内容
+   *
+   * @param doc
+   * @param value
+   */
+  private void addDoc(XWPFDocument doc, String[] value) {
+
+    for (String dataItem : value) {
+      // 正文
+      XWPFParagraph paraX = doc.createParagraph();
+      XWPFRun runX = paraX.createRun();
+
+      // 正文内容
+      runX.setText(dataItem);
+    }
   }
 
   /**

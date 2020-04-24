@@ -1,21 +1,12 @@
 package com.kk.docprocess.doctoadapterdoc.process.compile.builder;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.kk.docprocess.doctoadapterdoc.bean.ParamBase;
-import com.kk.docprocess.doctoadapterdoc.console.ProcEnum;
-import com.kk.docprocess.doctoadapterdoc.process.compile.jsonBeanWrite.JavaBeanCreate;
 import com.kk.docprocess.doctoadapterdoc.process.impl.ValueProcess;
-import com.kk.utils.FileWriteUtils;
 
-import javax.tools.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /** 通过直接构建json字符串来返回，不通过编译生成java文件 */
 public class BuilderJsonRequest {
@@ -24,10 +15,10 @@ public class BuilderJsonRequest {
   public static final BuilderJsonRequest INSTANCE = new BuilderJsonRequest();
 
   /** */
-  private Gson gson = new Gson();
+  private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public String buildRequest(List<ParamBase> columnList) {
+  public String[] buildRequest(List<ParamBase> columnList) {
 
     JsonObject result = new JsonObject();
 
@@ -38,7 +29,10 @@ public class BuilderJsonRequest {
       setProperties(tableBean, result);
     }
 
-    return gson.toJson(result);
+    String data = gson.toJson(result);
+    String[] dataArray = data.split("\n");
+
+    return dataArray;
   }
 
   /**

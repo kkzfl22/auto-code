@@ -27,12 +27,15 @@ public class MysqlTableColumnDTO extends TableColumnDTO implements DataResultPar
     String scale = rs.getString("NUMERIC_SCALE");
     String charMax = rs.getString("CHARACTER_MAXIMUM_LENGTH");
     String octLength = rs.getString("CHARACTER_OCTET_LENGTH");
+    String isNullAble = rs.getString("IS_NULLABLE");
+    String columnDefault = rs.getString("COLUMN_DEFAULT");
 
     columnName = columnName.toLowerCase();
 
     boolean priKey = "PRI".equals(primayKey) ? true : false;
-
-    TableColumnDTO bean = new TableColumnDTO(columnName, columnMsg, dataType, priKey);
+    boolean nullFlag = "YES".equals(isNullAble) ? true : false;
+    TableColumnDTO bean =
+        new TableColumnDTO(columnName, columnMsg, dataType, priKey, nullFlag, columnDefault);
     if (null != precision) {
       bean.setDataLength(Integer.parseInt(precision));
     }
@@ -50,6 +53,8 @@ public class MysqlTableColumnDTO extends TableColumnDTO implements DataResultPar
     }
     bean.setAutoIncrement("auto_increment".equals(extra) ? true : false);
     bean.setTableName(tableName);
+
+
 
     return bean;
   }

@@ -33,14 +33,28 @@ public class TableColumnDTO {
   /** 是否自增长 */
   private boolean isAutoIncrement;
 
+  /** 是否允许为空 */
+  private Boolean nullFlag;
+
+  /** 数据库设置的默认值 */
+  private String defaultValue;
+
   public TableColumnDTO() {}
 
-  public TableColumnDTO(String columnName, String columnMsg, String dataType, boolean primaryKey) {
+  public TableColumnDTO(
+      String columnName,
+      String columnMsg,
+      String dataType,
+      boolean primaryKey,
+      boolean nullFlag,
+      String defaultvalue) {
     super();
     this.columnName = columnName;
     this.columnMsg = columnMsg;
     this.dataType = dataType;
     this.primaryKey = primaryKey;
+    this.nullFlag = nullFlag;
+    this.defaultValue = defaultvalue;
   }
 
   public boolean isPrimaryKey() {
@@ -107,6 +121,22 @@ public class TableColumnDTO {
     this.tableName = tableName;
   }
 
+  public boolean isNullFlag() {
+    return nullFlag;
+  }
+
+  public void setNullFlag(boolean nullFlag) {
+    this.nullFlag = nullFlag;
+  }
+
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+  }
+
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder("TableColumnDTO{");
@@ -118,6 +148,8 @@ public class TableColumnDTO {
     sb.append(", dataLength=").append(dataLength);
     sb.append(", dataScale=").append(dataScale);
     sb.append(", isAutoIncrement=").append(isAutoIncrement);
+    sb.append(", emptyFlag=").append(nullFlag);
+    sb.append(", defaultValue='").append(defaultValue).append('\'');
     sb.append('}');
     return sb.toString();
   }

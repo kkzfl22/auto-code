@@ -29,9 +29,9 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
   private static final String FILE_PATH = "interfacesDtoAssembler";
 
   /** 领域层的方法 */
-  private static final String TODO = "todo";
+  private static final String TODO = "toDO";
 
-  private static final String TODTO = "todto";
+  private static final String TODTO = "toDTO";
 
   private static final String DTO_NAME = "dto";
   private static final String DOMAIN_NAME = "doEntity";
@@ -196,6 +196,25 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
         .append(Symbol.SEMICOLON)
         .append(NEXT_LINE);
 
+    // 检查传递的参数是否为空，为空，则返回声明的对象
+    sb.append(formatMsg(2))
+        .append(JavaCodeKey.IF)
+        .append(Symbol.BRACKET_LEFT)
+        .append(JavaCodeKey.NULL)
+        .append(Symbol.EQUALS)
+        .append(Symbol.SPACE)
+        .append(DTO_NAME)
+        .append(Symbol.BRACKET_RIGHT)
+        .append(Symbol.BRACE_LEFT)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(3))
+        .append(JavaCodeKey.RETURN)
+        .append(Symbol.SPACE)
+        .append(DOMAIN_NAME)
+        .append(Symbol.SEMICOLON)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(Symbol.BRACE_RIGHT).append(NEXT_LINE);
+
     // 添加属性的信息
     for (int i = 0; i < columnList.size(); i++) {
       TableColumnDTO tableBean = columnList.get(i);
@@ -276,6 +295,25 @@ public class JavaCodeDTOAssemblerCreate extends TableProcessBase implements Auto
         .append(Symbol.BRACKET_RIGHT)
         .append(Symbol.SEMICOLON)
         .append(NEXT_LINE);
+
+    // 检查传递的参数是否为空，为空，则返回声明的对象
+    sb.append(formatMsg(2))
+        .append(JavaCodeKey.IF)
+        .append(Symbol.BRACKET_LEFT)
+        .append(JavaCodeKey.NULL)
+        .append(Symbol.EQUALS)
+        .append(Symbol.SPACE)
+        .append(DOMAIN_NAME)
+        .append(Symbol.BRACKET_RIGHT)
+        .append(Symbol.BRACE_LEFT)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(3))
+        .append(JavaCodeKey.RETURN)
+        .append(Symbol.SPACE)
+        .append(DTO_NAME)
+        .append(Symbol.SEMICOLON)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(Symbol.BRACE_RIGHT).append(NEXT_LINE);
 
     // 添加属性的信息
     for (int i = 0; i < columnList.size(); i++) {

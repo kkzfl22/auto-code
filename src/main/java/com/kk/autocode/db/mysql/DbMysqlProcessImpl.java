@@ -46,7 +46,8 @@ public class DbMysqlProcessImpl implements DbProcessInf {
     // 查询所有的表
     String sql =
         "select table_name,column_name,data_type,COLUMN_COMMENT,COLUMN_KEY,EXTRA,"
-            + "NUMERIC_PRECISION,NUMERIC_SCALE,CHARACTER_MAXIMUM_LENGTH,CHARACTER_OCTET_LENGTH "
+            + "NUMERIC_PRECISION,NUMERIC_SCALE,CHARACTER_MAXIMUM_LENGTH,CHARACTER_OCTET_LENGTH,"
+            + "IS_NULLABLE,COLUMN_DEFAULT "
             + "from information_schema.COLUMNS where table_schema = '"
             + tableSpace
             + "' order by table_name";
@@ -98,38 +99,6 @@ public class DbMysqlProcessImpl implements DbProcessInf {
     StandardTypeEnum standType = MysqlDataTypeEnum.databaseToStandKey(bean.getDataType());
 
     String outGener = JavaDataTypeGenerateValueEnum.getGenerateFun(standType, bean.getDataLength());
-
-    //    String randValue = null;
-    //    switch (type) {
-    //      case "int":
-    //        randValue = String.valueOf(NumberUtils.randInt(bean.getDataLength()));
-    //        break;
-    //      case "varchar":
-    //        // 随机生成一个字符串,5位以内
-    //        randValue = StringUtils.RandomString(NumberUtils.randInt(bean.getDataLength()));
-    //        break;
-    //      case "datetime":
-    //        randValue = DateUtils.getStrCurrtTime();
-    //        break;
-    //      case "bigint":
-    //        if (bean.getColumnName().toUpperCase().contains("TIME")) {
-    //          randValue = String.valueOf(DateUtils.getCurrTimeLong() + "l");
-    //        } else {
-    //          randValue = NumberUtils.randIntStr();
-    //        }
-    //        break;
-    //      case "timestamp":
-    //        randValue = DateUtils.getStrCurrtTimeSS();
-    //        break;
-    //      case "float":
-    //        // 随机生成两位小数
-    //        randValue = NumberUtils.randInt(99) + "." + NumberUtils.randInt(99) + "f";
-    //        break;
-    //      default:
-    //        // 默认生成值
-    //        randValue = "880";
-    //        break;
-    //    }
 
     return outGener;
   }

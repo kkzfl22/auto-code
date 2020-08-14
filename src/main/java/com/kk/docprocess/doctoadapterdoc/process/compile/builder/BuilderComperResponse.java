@@ -111,7 +111,7 @@ public class BuilderComperResponse {
       // 获取编译器
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-      // 创建诊断信息监听器, 用于手机诊断信息
+      // 创建诊断信息监听器, 用于诊断信息
       DiagnosticCollector<JavaFileObject> diagnosticListeners = new DiagnosticCollector<>();
 
       // 获取FileManager

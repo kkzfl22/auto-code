@@ -32,6 +32,13 @@ public class JavaCodeKey {
 
   public static final String STATIC = "static";
 
+  /** 无返回值对象定义 */
+  public static final String VOID = "void";
+
+  public static final String IF = "if ";
+
+  public static final String NULL = "null ";
+
   /** 类注释开始 */
   public static final String ANNO_CLASS = "/**";
 

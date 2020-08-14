@@ -29,7 +29,8 @@ public class OracleTableColumnDTO extends TableColumnDTO implements DataResultPa
 
     boolean priKey = null != primayKey && "".equals(primayKey) ? true : false;
 
-    TableColumnDTO tableBean = new TableColumnDTO(columnName, columnMsg, dataType, priKey);
+    TableColumnDTO tableBean =
+        new TableColumnDTO(columnName, columnMsg, dataType, priKey, false, null);
 
     tableBean.setDataLength(dataLength);
     tableBean.setDataScale(dataScale);

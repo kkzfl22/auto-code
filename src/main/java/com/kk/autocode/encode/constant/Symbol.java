@@ -46,6 +46,8 @@ public class Symbol {
 
   public static final String EQUAL = "=";
 
+  public static final String EQUALS = "==";
+
   public static final String EQUAL_NOT = "!= ";
 
   public static final String POUND = "#";

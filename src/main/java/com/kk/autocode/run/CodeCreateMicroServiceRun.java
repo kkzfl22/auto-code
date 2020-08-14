@@ -17,51 +17,36 @@ import java.util.List;
 public class CodeCreateMicroServiceRun {
 
   public static void main(String[] args) throws Exception {
-
     String basePkg = "com.paraview.security.pap.microservice.";
-
     // javapackage路径
-    String prefix = basePkg + "domain.data.";
-
-    // mybatis命名空间
-    String mybatisNameSpace = basePkg + "domain.data.";
+    String prefix = basePkg + "domain.attribute.";
 
     // 表空间
     String tableSpace = "autocode";
-    // String tableSpace = "compress";
 
     // 文件路径
     String filePath = "D:/java/encode/javacode/";
 
-    CreateParamBean param = new CreateParamBean(filePath, prefix, mybatisNameSpace, tableSpace);
+    CreateParamBean param = new CreateParamBean(filePath, prefix, prefix, tableSpace);
 
     AutoCodeBeanBuilder builer = new AutoCodeBeanBuilder();
-
     // 使用javaBean代码的生成操作
     // 生成po
     builer.addMicorServiceRepositoryPo();
-
     // 生成dto
     builer.addMicorServiceRepositoryDto();
-
     // 添加领域层与实体层的代码转化
     builer.addMicorServiceDtoassembler();
-
     // 生成领域层实体
     builer.addMicorServiceRepositoryDo();
-
     // 添加持久层与领域层的代码转化
     builer.addMicorServicePOassembler();
-
     // 生成数据库mapper文件信息
     builer.addMicroServiceRepositoryMapper();
-
     // 生成Dao的接口代码,生成DAO实现的代码
     builer.addMicroServiceRepositoryDAOInf();
-
     // 生成junitDAO测试代码
     builer.addMicroServiceRepositoryJunitDAOInf();
-
     // 设置查询信息
     builer.setQueryData(param);
     // 添加单元测试的父类

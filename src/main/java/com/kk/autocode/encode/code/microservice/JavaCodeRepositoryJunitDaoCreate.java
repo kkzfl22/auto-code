@@ -70,6 +70,9 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
   private static final String GET_ITEM_INDEX = ".get(0)";
   private static final String GET_KEY = "get";
   private static final String SET_KEY = "set";
+  private static final String RESULTSET_ASSERT_NAME = "assertResultSetData";
+  private static final String SRC_NAME = "src";
+  private static final String TARGET_NAME = "target";
 
   private void enTestDaoCode(
       String path, String basePackageStr, String tableSpace, EncodeContext context)
@@ -149,6 +152,9 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
       if (primaryKeyList != null) {
         this.queryByIdMethod(sb, beanPoName, columnList, primaryKeyList);
       }
+
+      // 添加数据集结果验证的方法
+      junitQueryRspDataAssert(sb, columnList, beanPoName);
 
       // 删除方法
       deleteMethod(sb, beanPoName);
@@ -531,8 +537,19 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
         .append(Symbol.SEMICOLON)
         .append(NEXT_LINE);
 
-    // 生成单元测试中的数据对比
-    junitEquals(sb, columnList, beanPoName);
+    // 调用结果验证方法
+    sb.append(formatMsg(2))
+        .append(JavaCodeKey.THIS)
+        .append(Symbol.POINT)
+        .append(RESULTSET_ASSERT_NAME)
+        .append(Symbol.BRACKET_LEFT)
+        .append(TMP_GET_PO_NAME)
+        .append(Symbol.COMMA)
+        .append(INSTANCE_NAME_PO)
+        .append(Symbol.BRACKET_RIGHT)
+        .append(Symbol.SEMICOLON)
+        .append(NEXT_LINE);
+    // junitEquals(sb, columnList, beanPoName);
     sb.append(formatMsg(1)).append(Symbol.BRACE_RIGHT);
 
     sb.append(NEXT_LINE);
@@ -598,7 +615,21 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
         .append(NEXT_LINE);
 
     // 生成单元测试中的数据对比
-    junitEquals(sb, columnList, beanPoName);
+    // junitEquals(sb, columnList, beanPoName);
+
+    // 调用结果验证方法
+    sb.append(formatMsg(2))
+        .append(JavaCodeKey.THIS)
+        .append(Symbol.POINT)
+        .append(RESULTSET_ASSERT_NAME)
+        .append(Symbol.BRACKET_LEFT)
+        .append(TMP_GET_PO_NAME)
+        .append(Symbol.COMMA)
+        .append(INSTANCE_NAME_PO)
+        .append(Symbol.BRACKET_RIGHT)
+        .append(Symbol.SEMICOLON)
+        .append(NEXT_LINE);
+
     sb.append(formatMsg(1)).append(Symbol.BRACE_RIGHT);
 
     sb.append(NEXT_LINE);
@@ -647,15 +678,44 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
     sb.append(NEXT_LINE);
   }
 
+  /** 进行数据结果集的字段校验 */
+  private void junitQueryRspDataAssert(
+      StringBuilder sb, List<TableColumnDTO> columnListParam, String beanDtoName) {
+
+    // 方法的声明
+    sb.append(formatMsg(1))
+        .append(JavaCodeKey.PRIVATE)
+        .append(Symbol.SPACE)
+        .append(JavaCodeKey.VOID)
+        .append(Symbol.SPACE)
+        .append(RESULTSET_ASSERT_NAME)
+        .append(Symbol.BRACKET_LEFT)
+        .append(beanDtoName)
+        .append(Symbol.SPACE)
+        .append(SRC_NAME)
+        .append(Symbol.COMMA)
+        .append(beanDtoName)
+        .append(Symbol.SPACE)
+        .append(TARGET_NAME)
+        .append(Symbol.BRACKET_RIGHT)
+        .append(Symbol.BRACE_LEFT)
+        .append(NEXT_LINE);
+
+    junitEquals(sb, columnListParam, SRC_NAME, TARGET_NAME);
+    sb.append(formatMsg(1)).append(Symbol.BRACE_RIGHT).append(NEXT_LINE).append(NEXT_LINE);
+    ;
+  }
+
   /**
    * 输出属性文件信息
    *
    * @param sb 字符串
    * @param columnListParam 列信息
-   * @param beanDtoName javaBean的名称
+   * @param srcName 源的名称
+   * @param targetName 目标的名称
    */
   private void junitEquals(
-      StringBuilder sb, List<TableColumnDTO> columnListParam, String beanDtoName) {
+      StringBuilder sb, List<TableColumnDTO> columnListParam, String srcName, String targetName) {
 
     // 拷贝集合
     List<TableColumnDTO> columnList = copyList(columnListParam);
@@ -670,7 +730,7 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
       // 添加生成代码的方法
       sb.append(formatMsg(2));
       sb.append(ASSERT);
-      sb.append(TMP_GET_PO_NAME);
+      sb.append(srcName);
       sb.append(Symbol.POINT);
       sb.append(GET_KEY)
           .append(this.toProJavaName(columnList.get(i).getColumnName()))
@@ -678,7 +738,7 @@ public class JavaCodeRepositoryJunitDaoCreate extends TableProcessBase implement
           .append(Symbol.BRACKET_RIGHT)
           .append(Symbol.COMMA);
 
-      sb.append(INSTANCE_NAME_PO);
+      sb.append(targetName);
       sb.append(Symbol.POINT).append(GET_KEY);
       sb.append(this.toProJavaName(columnList.get(i).getColumnName()))
           .append(Symbol.BRACKET_LEFT)

@@ -102,7 +102,7 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     dirFile.mkdirs();
 
     // 获得表信息
-    Map<String, List<TableColumnDTO>> srcMap = this.getTableColumnInfoByMap(tableSpaceName);
+    Map<String, List<TableColumnDTO>> srcMap = context.getColumnMap();
 
     // 获取列信息
     Map<String, List<TableColumnDTO>> map = this.parseComment(srcMap);
@@ -165,7 +165,7 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       // 删除的方法
       deleteMethod(sb, tableMsg, beanParam, primaryKeyList);
       // 查询的方法
-      queryMethod(sb, tableMsg, beanParam, resultMapId, columnList, primaryKeyList);
+      queryPageMethod(sb, tableMsg, beanParam, resultMapId, columnList, primaryKeyList);
 
       // 当前查询如果为单主键，则添加根据id的查询方法
       if (primaryKeyList != null) {
@@ -303,6 +303,8 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
         newColumnDto.setColumnMsg(this.specialChar(columnDto.getColumnMsg()));
         newColumnDto.setColumnName(columnDto.getColumnName());
         newColumnDto.setPrimaryKey(columnDto.isPrimaryKey());
+        newColumnDto.setNullFlag(columnDto.isNullFlag());
+        newColumnDto.setDefaultValue(columnDto.getDefaultValue());
         dtoList.add(newColumnDto);
       }
       result.put(entry.getKey(), dtoList);
@@ -488,25 +490,32 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       TableColumnDTO tableMaper = columnList.get(i);
       String coumnName = tableMaper.getColumnName();
       String javaName = toJava(coumnName);
-      // 添加列注释信息
+      // 添加表注释信息
       sb.append(formatMsg(3))
           .append(MyBatisKey.DOC_START)
           .append(tableMaper.getColumnMsg())
           .append(MyBatisKey.DOC_END)
           .append(NEXT_LINE);
 
-      // 进行类型检查判断
-      String switchStr = this.switchType(tableMaper, javaName);
+      if (tableMaper.isNullFlag()) {
 
-      // 生成判断并添加列
-      sb.append(formatMsg(3))
-          .append(IF_START)
-          .append(switchStr)
-          .append(Symbol.QUOTE)
-          .append(MyBatisKey.END)
-          .append(NEXT_LINE);
-      sb.append(formatMsg(4)).append(coumnName).append(Symbol.COMMA).append(NEXT_LINE);
-      sb.append(formatMsg(3)).append(IF_END).append(NEXT_LINE);
+        // 进行类型检查判断
+        String switchStr = this.switchType(tableMaper, javaName);
+
+        // 生成判断并添加列
+        sb.append(formatMsg(3))
+            .append(IF_START)
+            .append(switchStr)
+            .append(Symbol.QUOTE)
+            .append(MyBatisKey.END)
+            .append(NEXT_LINE);
+        sb.append(formatMsg(4)).append(coumnName).append(Symbol.COMMA).append(NEXT_LINE);
+        sb.append(formatMsg(3)).append(IF_END);
+      } else {
+        sb.append(formatMsg(3)).append(coumnName).append(Symbol.COMMA);
+      }
+
+      sb.append(NEXT_LINE);
     }
     sb.append(formatMsg(2)).append(TRIM_XML_END).append(NEXT_LINE);
     sb.append(formatMsg(2)).append(TRIM_VALUE_XML_START).append(NEXT_LINE);
@@ -525,25 +534,42 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       // 进行类型检查判断
       String switchStr = this.switchType(tableMaper, javaName);
 
-      // 添加列的值信息
-      sb.append(formatMsg(3))
-          .append(IF_START)
-          .append(switchStr)
-          .append(Symbol.SPACE)
-          .append(Symbol.QUOTE)
-          .append(MyBatisKey.END)
-          .append(NEXT_LINE);
-      sb.append(formatMsg(4))
-          .append(Symbol.POUND)
-          .append(Symbol.BRACE_LEFT)
-          .append(javaName)
-          .append(JDBC_TYPE)
-          .append(typeName)
-          .append(Symbol.BRACE_RIGHT);
+      // 获取数据库当前列能否为空,不则为空，则直接写死
+      if (tableMaper.isNullFlag()) {
+        // 添加列的值信息
+        sb.append(formatMsg(3))
+            .append(IF_START)
+            .append(switchStr)
+            .append(Symbol.SPACE)
+            .append(Symbol.QUOTE)
+            .append(MyBatisKey.END)
+            .append(NEXT_LINE);
+        sb.append(formatMsg(4))
+            .append(Symbol.POUND)
+            .append(Symbol.BRACE_LEFT)
+            .append(javaName)
+            .append(JDBC_TYPE)
+            .append(typeName)
+            .append(Symbol.BRACE_RIGHT);
 
-      sb.append(Symbol.COMMA);
+        sb.append(Symbol.COMMA);
+        sb.append(NEXT_LINE);
+        sb.append(formatMsg(3)).append(IF_END);
+      }
+      // 当不允许为空时，则直接填写
+      else {
+        sb.append(formatMsg(3))
+            .append(Symbol.POUND)
+            .append(Symbol.BRACE_LEFT)
+            .append(javaName)
+            .append(JDBC_TYPE)
+            .append(typeName)
+            .append(Symbol.BRACE_RIGHT)
+            .append(Symbol.COMMA);
+        ;
+      }
+      // 换行符
       sb.append(NEXT_LINE);
-      sb.append(formatMsg(3)).append(IF_END).append(NEXT_LINE);
     }
     sb.append(formatMsg(2)).append(TRIM_XML_END).append(NEXT_LINE);
     sb.append(formatMsg(1)).append(INSERT_XML_END).append(NEXT_LINE);
@@ -565,6 +591,11 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
       String beanParam,
       List<TableColumnDTO> columnList,
       List<TableColumnDTO> primaryKeyList) {
+
+    List<TableColumnDTO> copyColumnList = new ArrayList<>(columnList);
+    // 数据不能修改主键
+    copyColumnList.removeAll(primaryKeyList);
+
     // 修改
     sb.append(formatMsg(1))
         .append(MyBatisKey.DOC_START)
@@ -593,8 +624,9 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     sb.append(formatMsg(2)).append(UPDATE_SET).append(NEXT_LINE);
     // trim开始
     sb.append(formatMsg(3)).append(UPDATE_TRIM_START).append(NEXT_LINE);
-    for (int i = 0; i < columnList.size(); i++) {
-      TableColumnDTO tableMaper = columnList.get(i);
+
+    for (int i = 0; i < copyColumnList.size(); i++) {
+      TableColumnDTO tableMaper = copyColumnList.get(i);
       String columnName = tableMaper.getColumnName();
       String javaName = toJava(columnName);
       String typeName = tableMaper.getDataType();
@@ -680,7 +712,17 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     sb.append(NEXT_LINE);
   }
 
-  private void queryMethod(
+  /**
+   * 分页查询方法
+   *
+   * @param sb
+   * @param tableMsg
+   * @param beanParam
+   * @param resultMapId
+   * @param columnList
+   * @param keyColumn
+   */
+  private void queryPageMethod(
       StringBuilder sb,
       TableInfoDTO tableMsg,
       String beanParam,
@@ -721,16 +763,9 @@ public class JavaCodeRepositoryMyBatisMapperCreate extends TableProcessBase impl
     sb.append(formatMsg(2)).append(QUERY_KEY_FROM).append(NEXT_LINE);
     sb.append(formatMsg(2)).append(tableMsg.getTableName()).append(NEXT_LINE);
     sb.append(formatMsg(2)).append(WHERE_START).append(NEXT_LINE);
-    // 添加where条件
-    for (int i = 0; i < keyColumn.size(); i++) {
-      // 添加列注释信息
-      sb.append(formatMsg(3))
-          .append(MyBatisKey.DOC_START)
-          .append(keyColumn.get(i).getColumnMsg())
-          .append(MyBatisKey.DOC_END)
-          .append(NEXT_LINE);
-      sb.append(this.addWhere(keyColumn.get(i), 3));
-    }
+    // 添加where条件,以主键做查询条件
+    sb.append(this.addDeleteWhere(keyColumn, 3));
+
     sb.append(formatMsg(2)).append(WHERE_END).append(NEXT_LINE);
     sb.append(formatMsg(1)).append(QUERY_XML_END).append(NEXT_LINE);
     sb.append(NEXT_LINE);

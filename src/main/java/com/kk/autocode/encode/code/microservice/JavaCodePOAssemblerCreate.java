@@ -29,9 +29,9 @@ public class JavaCodePOAssemblerCreate extends TableProcessBase implements AutoC
   private static final String FILE_PATH = "repositoryDoAssembler";
 
   /** 将领域数据转换为领域数据 */
-  private static final String TOPO = "topo";
+  private static final String TOPO = "toPO";
 
-  private static final String TODO = "todo";
+  private static final String TODO = "toDO";
 
   private static final String PO_NAME = "po";
   private static final String DOMAIN_NAME = "doEntity";
@@ -58,7 +58,7 @@ public class JavaCodePOAssemblerCreate extends TableProcessBase implements AutoC
 
     dirFile.mkdirs();
 
-    String basePackageStr = (String) context.getDataMap().get(CreateCommKey.BASE_PATH.getKey());
+    String basePackageStr = basePackageStrtmp;
 
     Map<String, TableInfoDTO> tableMap = context.getTableMap();
     Map<String, List<TableColumnDTO>> map = context.getColumnMap();
@@ -99,7 +99,7 @@ public class JavaCodePOAssemblerCreate extends TableProcessBase implements AutoC
       sb.append(JavaCodeKey.IMPORT)
           .append(Symbol.SPACE)
           .append(basePackageStr)
-          .append(JavaCodeDTOCreate.REPOSITORY_DTO_PACKAGE)
+          .append(JavaCodeRepositoryPoCreate.REPOSITORY_PO_PACKAGE)
           .append(Symbol.POINT)
           .append(poClassName)
           .append(Symbol.SEMICOLON)
@@ -196,6 +196,25 @@ public class JavaCodePOAssemblerCreate extends TableProcessBase implements AutoC
         .append(Symbol.SEMICOLON)
         .append(NEXT_LINE);
 
+    // 检查传递的参数是否为空，为空，则返回声明的对象
+    sb.append(formatMsg(2))
+        .append(JavaCodeKey.IF)
+        .append(Symbol.BRACKET_LEFT)
+        .append(JavaCodeKey.NULL)
+        .append(Symbol.EQUALS)
+        .append(Symbol.SPACE)
+        .append(PO_NAME)
+        .append(Symbol.BRACKET_RIGHT)
+        .append(Symbol.BRACE_LEFT)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(3))
+        .append(JavaCodeKey.RETURN)
+        .append(Symbol.SPACE)
+        .append(DOMAIN_NAME)
+        .append(Symbol.SEMICOLON)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(Symbol.BRACE_RIGHT).append(NEXT_LINE);
+
     // 添加属性的信息
     for (int i = 0; i < columnList.size(); i++) {
       TableColumnDTO tableBean = columnList.get(i);
@@ -276,6 +295,25 @@ public class JavaCodePOAssemblerCreate extends TableProcessBase implements AutoC
         .append(Symbol.BRACKET_RIGHT)
         .append(Symbol.SEMICOLON)
         .append(NEXT_LINE);
+
+    // 检查传递的参数是否为空，为空，则返回声明的对象
+    sb.append(formatMsg(2))
+        .append(JavaCodeKey.IF)
+        .append(Symbol.BRACKET_LEFT)
+        .append(JavaCodeKey.NULL)
+        .append(Symbol.EQUALS)
+        .append(Symbol.SPACE)
+        .append(DOMAIN_NAME)
+        .append(Symbol.BRACKET_RIGHT)
+        .append(Symbol.BRACE_LEFT)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(3))
+        .append(JavaCodeKey.RETURN)
+        .append(Symbol.SPACE)
+        .append(PO_NAME)
+        .append(Symbol.SEMICOLON)
+        .append(NEXT_LINE);
+    sb.append(formatMsg(2)).append(Symbol.BRACE_RIGHT).append(NEXT_LINE);
 
     // 添加属性的信息
     for (int i = 0; i < columnList.size(); i++) {

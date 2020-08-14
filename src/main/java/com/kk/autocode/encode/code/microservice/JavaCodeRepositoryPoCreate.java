@@ -23,7 +23,7 @@ import java.util.Map.Entry;
  */
 public class JavaCodeRepositoryPoCreate extends TableProcessBase implements AutoCodeInf {
 
-  private static final String DOC_ANNO_MSG = "的实体信息";
+  private static final String DOC_ANNO_MSG = "的数据库存储实体信息";
 
   private static final String FILE_PATH = "repositorypo";
 

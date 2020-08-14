@@ -19,17 +19,17 @@ public class CodeCreateBeanRun {
   public static void main(String[] args) throws Exception {
 
     // javapackage路径
-    String prefix = "com.para.monitor.cluster.scheduleetl.";
+    String prefix = "com.para.monitor.cluster.data.center.";
 
     // mybatis命名空间
-    String mybatisNameSpace = "com.para.monitor.cluster.scheduleetl.";
+    String mybatisNameSpace = "com.para.monitor.cluster.data.center.";
 
     // 表空间
     String tableSpace = "autocode";
     // String tableSpace = "compress";
 
     // 文件路径
-    String filePath = "D:/java/encode/";
+    String filePath = "D:/java/encode/javacode/";
 
     CreateParamBean param = new CreateParamBean(filePath, prefix, mybatisNameSpace, tableSpace);
 

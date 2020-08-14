@@ -34,6 +34,8 @@ public class MysqlCreateSqlRun {
     instance.outMysql(path, outPath + outMysqlPath);
     // 输出sqllite
     instance.outSqllite(path, outPath + outSqllitePath);
+
+    System.out.println();
   }
 
   private void cleanPath(String filePath) {
@@ -116,7 +118,8 @@ public class MysqlCreateSqlRun {
       // 进行文件写入
       fileWrite.wirteFile(outPath, sql);
 
-      System.out.println(sql);
+      System.out.println("文件路径 :" + outPath);
+      // System.out.println(sql);
     } catch (Exception e) {
       e.printStackTrace();
     }

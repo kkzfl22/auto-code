@@ -19,7 +19,7 @@ public enum ProcEnum {
 
 	QUERYPAGE("queryPage", "分页查询操作"),
 	
-	PROC_URL_SUFFIX("Action",""),
+	PROC_URL_SUFFIX("Api",""),
 
 	PROC_SUFFIX(".action", "请求的后缀名");
 

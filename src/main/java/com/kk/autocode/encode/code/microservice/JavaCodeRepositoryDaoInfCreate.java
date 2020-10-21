@@ -38,7 +38,7 @@ public class JavaCodeRepositoryDaoInfCreate extends TableProcessBase implements 
   private static final String QUERY_ID_DOC = "根据id进行查询操作";
   private static final String METHOD_PARAM = " @param param ";
   private static final String METHOD_PARAM_ID = " @param param ";
-  private static final String METHOD_PARAM_DOC = "参数信息";
+    private static final String METHOD_PARAM_DOC = "参数信息";
   private static final String METHOD_PARAM_ID_DOC = "主键查询参数信息";
   private static final String METHOD_RESULT = " @return 数据库影响的行数";
   private static final String METHOD_QUERY_RESULT = " @return 数据库查询结果集";

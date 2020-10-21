@@ -19,10 +19,10 @@ public class CodeCreateBeanRun {
   public static void main(String[] args) throws Exception {
 
     // javapackage路径
-    String prefix = "com.para.monitor.cluster.data.center.";
+    String prefix = "com.para.monitor.cluster.ranger.";
 
     // mybatis命名空间
-    String mybatisNameSpace = "com.para.monitor.cluster.data.center.";
+    String mybatisNameSpace = "com.para.monitor.cluster.ranger.";
 
     // 表空间
     String tableSpace = "autocode";

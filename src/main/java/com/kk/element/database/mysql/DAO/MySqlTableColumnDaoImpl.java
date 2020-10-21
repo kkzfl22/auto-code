@@ -29,7 +29,7 @@ public class MySqlTableColumnDaoImpl {
 
     StringBuilder sql = new StringBuilder();
     sql.append("select table_name,column_name,data_type,COLUMN_COMMENT,COLUMN_KEY,EXTRA,");
-    sql.append("NUMERIC_PRECISION,NUMERIC_SCALE,CHARACTER_MAXIMUM_LENGTH,CHARACTER_OCTET_LENGTH  ");
+    sql.append("NUMERIC_PRECISION,NUMERIC_SCALE,CHARACTER_MAXIMUM_LENGTH,CHARACTER_OCTET_LENGTH,IS_NULLABLE,COLUMN_DEFAULT  ");
     sql.append("from information_schema.COLUMNS where table_schema = '");
     sql.append(databaseName);
     sql.append("' order by table_name");

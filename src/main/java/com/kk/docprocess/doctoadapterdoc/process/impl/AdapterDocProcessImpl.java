@@ -44,11 +44,11 @@ public class AdapterDocProcessImpl implements AdapterDocProcess {
           adapterList = new ArrayList<>();
         }
 
-        adapterList.add(parseAdapterBean(wordTableBean, ProcEnum.INSERT));
-        adapterList.add(parseAdapterBean(wordTableBean, ProcEnum.UPDATE));
-        adapterList.add(parseAdapterBean(wordTableBean, ProcEnum.DELETE));
-        adapterList.add(parseAdapterBean(wordTableBean, ProcEnum.QUERY));
-        adapterList.add(parseAdapterBean(wordTableBean, ProcEnum.QUERYPAGE));
+        adapterList.add(insertAdapterBean(wordTableBean));
+        adapterList.add(updateAdapterBean(wordTableBean));
+        adapterList.add(deleteAdapterBean(wordTableBean));
+        adapterList.add(queryPageAdapterBean(wordTableBean));
+        adapterList.add(queryAdapterBean(wordTableBean));
 
         adapterMap.put(wordTableBean.getTableMsg(), adapterList);
       }
@@ -61,57 +61,157 @@ public class AdapterDocProcessImpl implements AdapterDocProcess {
   }
 
   /**
-   * 进行一个完整的请求的转换
+   * 插入的请求
    *
    * @param wordTableBean
-   * @param proc 属性参数
    * @return
    */
-  private AdapterBean parseAdapterBean(TableBean wordTableBean, ProcEnum proc) {
+  private AdapterBean insertAdapterBean(TableBean wordTableBean) {
+    String baseNameUrl = NameProcess.INSTANCE.toJava(wordTableBean.getTableName());
+    AdapterBean adapter = new AdapterBean();
+    // 类名命令，首字母大字，其他小写
+    adapter.setName(NameProcess.INSTANCE.toProJavaName(wordTableBean.getTableName()));
+    // 设置url信息
+    adapter.setUrl(
+        baseNameUrl + ProcEnum.PROC_URL_SUFFIX.getKey() + "/" + ProcEnum.INSERT.getKey());
+    adapter.setMsg(wordTableBean.getTableMsg() + "——" + ProcEnum.INSERT.getMsg());
+    adapter.setRequest(getAdapterParam(wordTableBean.getColumnList(), true));
+    // 修改的操作
+    adapter.setResponse(responseUpdate());
+
+    return adapter;
+  }
+
+  /**
+   * 插入的请求
+   *
+   * @param wordTableBean
+   * @return
+   */
+  private AdapterBean updateAdapterBean(TableBean wordTableBean) {
 
     String baseNameUrl = NameProcess.INSTANCE.toJava(wordTableBean.getTableName());
     AdapterBean adapter = new AdapterBean();
-
-    adapter.setProc(proc);
-
     // 类名命令，首字母大字，其他小写
     adapter.setName(NameProcess.INSTANCE.toProJavaName(wordTableBean.getTableName()));
-
     // 设置url信息
     adapter.setUrl(
-        baseNameUrl
-            + ProcEnum.PROC_URL_SUFFIX.getKey()
-            + "/"
-            + proc.getKey()
-            + ProcEnum.PROC_SUFFIX.getKey());
-    adapter.setMsg(wordTableBean.getTableMsg() + "——" + proc.getMsg());
+        baseNameUrl + ProcEnum.PROC_URL_SUFFIX.getKey() + "/" + ProcEnum.UPDATE.getKey());
+    adapter.setMsg(wordTableBean.getTableMsg() + "——" + ProcEnum.UPDATE.getMsg());
+    adapter.setRequest(getAdapterParam(wordTableBean.getColumnList(), true));
 
-    // 设置请求参数信息
-    if (ProcEnum.INSERT.getKey().equals(proc.getKey())) {
-      adapter.setRequest(getAdapterParam(wordTableBean.getColumnList(), true));
-    } else {
-      if (ProcEnum.QUERYPAGE.getKey().equals(proc.getKey())) {
-        List<ParamBase> pageList = getAdapterParam(wordTableBean.getColumnList(), false);
-        int LastSize = Integer.parseInt(pageList.get(pageList.size() - 1).getParamSeq());
-        ParamBase pageNum =
-            new ParamBase((LastSize + 1) + "", "pageNum", "int", "N", "", "分页查询当前页");
-        pageNum.setDbType("int");
-        pageList.add(pageNum);
-        ParamBase pageSize =
-            new ParamBase((LastSize + 2) + "", "pageSize", "int", "N", "", "每页显示的条数");
-        pageSize.setDbType("int");
-        pageList.add(pageSize);
-        adapter.setRequest(pageList);
-      } else {
-        adapter.setRequest(getAdapterParam(wordTableBean.getColumnList(), false));
-      }
-    }
+    // 修改的操作
+    adapter.setResponse(responseUpdate());
 
+    return adapter;
+  }
+
+  /**
+   * 插入的请求
+   *
+   * @param wordTableBean
+   * @return
+   */
+  private AdapterBean deleteAdapterBean(TableBean wordTableBean) {
+    String baseNameUrl = NameProcess.INSTANCE.toJava(wordTableBean.getTableName());
+    AdapterBean adapter = new AdapterBean();
+    // 类名命令，首字母大字，其他小写
+    adapter.setName(NameProcess.INSTANCE.toProJavaName(wordTableBean.getTableName()));
+    // 设置url信息
+    adapter.setUrl(
+        baseNameUrl + ProcEnum.PROC_URL_SUFFIX.getKey() + "/" + ProcEnum.DELETE.getKey());
+    adapter.setMsg(wordTableBean.getTableMsg() + "——" + ProcEnum.DELETE.getMsg());
+    adapter.setRequest(getAdapterParam(wordTableBean.getColumnList(), true));
+    // 修改的操作
+    adapter.setResponse(responseUpdate());
+
+    return adapter;
+  }
+
+  /**
+   * 进行一个完整的请求的转换
+   *
+   * @param wordTableBean
+   * @return
+   */
+  private AdapterBean queryPageAdapterBean(TableBean wordTableBean) {
+
+    String baseNameUrl = NameProcess.INSTANCE.toJava(wordTableBean.getTableName());
+    AdapterBean adapter = new AdapterBean();
+    adapter.setProc(ProcEnum.QUERYPAGE);
+    // 类名命令，首字母大字，其他小写
+    adapter.setName(NameProcess.INSTANCE.toProJavaName(wordTableBean.getTableName()));
+    // 设置url信息
+    adapter.setUrl(
+        baseNameUrl + ProcEnum.PROC_URL_SUFFIX.getKey() + "/" + ProcEnum.QUERYPAGE.getKey());
+    adapter.setMsg(wordTableBean.getTableMsg() + "——" + ProcEnum.QUERYPAGE.getMsg());
+    List<ParamBase> pageList = getAdapterParam(wordTableBean.getColumnList(), false);
+    int LastSize = Integer.parseInt(pageList.get(pageList.size() - 1).getParamSeq());
+    ParamBase pageNum = new ParamBase((LastSize + 1) + "", "pageNum", "int", "N", "", "分页查询当前页");
+    pageNum.setDbType("int");
+    pageList.add(pageNum);
+    ParamBase pageSize = new ParamBase((LastSize + 2) + "", "pageSize", "int", "N", "", "每页显示的条数");
+    pageSize.setDbType("int");
+    pageList.add(pageSize);
+    adapter.setRequest(pageList);
+    // 设置响应参数，首先区分是普通的增删改操作，还是查询操作,因为普通的增删改仅有响应头，内容没有，而查询会有内容信息
+    AdapterResponse rsp = this.responseUpdate();
+    // 查询设置
+    queryCommSet(wordTableBean, rsp);
+    // 设置具体的响应结果信息
+    rsp.setRspDataList(getAdapterParam(wordTableBean.getColumnList(), false));
+    adapter.setResponse(rsp);
+    return adapter;
+  }
+
+  private void queryCommSet(TableBean wordTableBean, AdapterResponse rsp) {
+    String className = NameProcess.INSTANCE.toJavaClassName(wordTableBean.getTableName());
+    ParamBase count = new ParamBase("4", "count", "int", "Y", "", "查询结果的条数");
+    count.setDbType("int");
+    rsp.getCommRsp().add(count);
+    ParamBase list = new ParamBase("5", "data", className + "[]", "Y", "", "查询结果");
+    list.setDbType("varchar");
+    rsp.getCommRsp().add(list);
+  }
+
+  /**
+   * 进行一个完整的请求的转换
+   *
+   * @param wordTableBean
+   * @return
+   */
+  private AdapterBean queryAdapterBean(TableBean wordTableBean) {
+
+    String baseNameUrl = NameProcess.INSTANCE.toJava(wordTableBean.getTableName());
+    AdapterBean adapter = new AdapterBean();
+    adapter.setProc(ProcEnum.QUERY);
+    // 类名命令，首字母大字，其他小写
+    adapter.setName(NameProcess.INSTANCE.toProJavaName(wordTableBean.getTableName()));
+    // 设置url信息
+    adapter.setUrl(baseNameUrl + ProcEnum.PROC_URL_SUFFIX.getKey() + "/" + ProcEnum.QUERY.getKey());
+    adapter.setMsg(wordTableBean.getTableMsg() + "——" + ProcEnum.QUERY.getMsg());
+    // 设置查询请求
+    adapter.setRequest(getAdapterParam(wordTableBean.getColumnList(), false));
+    // 设置响应参数，首先区分是普通的增删改操作，还是查询操作,因为普通的增删改仅有响应头，内容没有，而查询会有内容信息
+    AdapterResponse rsp = this.responseUpdate();
+    // 查询设置
+    queryCommSet(wordTableBean, rsp);
+    rsp.setFlag(ProcEnum.QUERY.getKey());
+    // 设置具体的响应结果信息
+    rsp.setRspDataList(getAdapterParam(wordTableBean.getColumnList(), false));
+    adapter.setResponse(rsp);
+    return adapter;
+  }
+
+  /**
+   * 修改数据响应
+   *
+   * @return
+   */
+  private AdapterResponse responseUpdate() {
     // 设置响应参数，首先区分是普通的增删改操作，还是查询操作,因为普通的增删改仅有响应头，内容没有，而查询会有内容信息
     AdapterResponse rsp = new AdapterResponse();
-
     List<ParamBase> commList = new ArrayList<>();
-
     ParamBase result = new ParamBase("1", "result", "boolean", "N", "", "当前操作是否成功,true成功,false失败");
     result.setDbType("boolean");
     commList.add(result);
@@ -121,41 +221,9 @@ public class AdapterDocProcessImpl implements AdapterDocProcess {
     ParamBase errorMsg = new ParamBase("3", "msg", "String", "Y", "", "错误信息");
     errorMsg.setDbType("varchar");
     commList.add(errorMsg);
-
-    if (ProcEnum.QUERYPAGE.getKey().equals(proc.getKey())) {
-      String className = NameProcess.INSTANCE.toJavaClassName(wordTableBean.getTableName());
-      ParamBase count = new ParamBase("4", "count", "int", "Y", "", "查询结果的条数");
-      count.setDbType("int");
-      commList.add(count);
-      ParamBase list = new ParamBase("5", "data", className + "[]", "Y", "", "查询结果");
-      list.setDbType("varchar");
-      commList.add(list);
-    }
-
-    if (ProcEnum.QUERY.getKey().equals(proc.getKey())) {
-      String className = NameProcess.INSTANCE.toJavaClassName(wordTableBean.getTableName());
-      ParamBase count = new ParamBase("4", "count", "int", "Y", "", "查询结果的条数");
-      count.setDbType("int");
-      commList.add(count);
-      ParamBase list = new ParamBase("5", "data", className, "Y", "", "查询结果");
-      list.setDbType("varchar");
-      commList.add(list);
-
-      rsp.setFlag(ProcEnum.QUERY.getKey());
-    }
-
     // 设置公共结果
     rsp.setCommRsp(commList);
-
-    if (ProcEnum.QUERY.getKey().equals(proc.getKey())
-        || ProcEnum.QUERYPAGE.getKey().equals(proc.getKey())) {
-      // 设置具体的响应结果信息
-      rsp.setRspDataList(getAdapterParam(wordTableBean.getColumnList(), false));
-    }
-
-    adapter.setResponse(rsp);
-
-    return adapter;
+    return rsp;
   }
 
   /**
@@ -167,24 +235,20 @@ public class AdapterDocProcessImpl implements AdapterDocProcess {
    */
   private List<ParamBase> getAdapterParam(List<TableColumnBean> columnList, boolean addProc) {
     List<ParamBase> listParam = new ArrayList<>();
-
     ParamBase paramBean = null;
-
     TableColumnBean tableColumnBean = null;
 
     int index = 1;
     for (int i = 0; i < columnList.size(); i++) {
-
       tableColumnBean = columnList.get(i);
-
       paramBean = new ParamBase();
-
       // 如果当前是增加，不需要主键不设置
       if (addProc) {
         if ("y".equalsIgnoreCase(tableColumnBean.getAutoInctFlag())) {
           continue;
         }
       }
+
       paramBean.setParamSeq(String.valueOf(index));
       paramBean.setParamName(NameProcess.INSTANCE.toJava(tableColumnBean.getColumnName()));
       paramBean.setDbType(tableColumnBean.getType().toLowerCase());

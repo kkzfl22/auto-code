@@ -3,10 +3,10 @@ package com.kk.docprocess.docCommon.bean;
 /** 列类型信息 */
 public class TableColumnBean implements Comparable<TableColumnBean> {
 
-  /** 序号 @字段说明 seqNum */
+  /** 序号 */
   private int seqNum;
 
-  /** 列名 @字段说明 columnName */
+  /** 列名 @ */
   private String columnName;
 
   /** 数据库的类型信息 */
@@ -18,16 +18,16 @@ public class TableColumnBean implements Comparable<TableColumnBean> {
   /** 列长度 */
   private int length;
 
-  /** 是否为空(Y/N) @字段说明 isNullFlag */
+  /** 是否为空(Y/N) */
   private String isNullFlag;
 
-  /** 默认值 @字段说明 defaultValue */
+  /** 默认值 */
   private String defaultValue;
 
-  /** 是否为自增加主键(Y/N) @字段说明 primaryKeyFlag */
+  /** 是否为自增加主键(Y/N) */
   private String autoInctFlag;
 
-  /** 描述信息 @字段说明 desc */
+  /** 描述信息 */
   private String desc;
 
   public int getSeqNum() {
